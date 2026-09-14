@@ -44,3 +44,13 @@ Open http://localhost:5173 — choose **Play Classic**, or go to `/play` directl
 - [ADRs](./adr/)
 
 Prototype archived at `legacy/index.prototype.html`.
+
+## Deploy (Vercel)
+
+1. Import [github.com/sadnova/numchess](https://github.com/sadnova/numchess) on [Vercel](https://vercel.com/new).
+2. Leave **Root Directory** empty (repo root). `vercel.json` sets install/build/output.
+3. **Node.js 22** (matches `.nvmrc` and CI).
+
+Production build: `pnpm turbo run build --filter=@numchess/web` → `apps/web/dist`.
+
+Client routes (`/`, `/play`) use SPA rewrites in `vercel.json`.
