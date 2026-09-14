@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   createSandboxState,
   lineScoreDelta,
@@ -10,6 +10,7 @@ import { Board } from "../components/game/Board";
 import { EndScreen } from "../components/game/EndScreen";
 import { GameFooter } from "../components/game/GameFooter";
 import { GameModeControls } from "../components/game/GameModeControls";
+import { SpectatorTransportControls } from "../components/game/SpectatorTransportControls";
 import { LiveScorePanel } from "../components/game/LiveScorePanel";
 import { ScoreFeed } from "../components/game/ScoreFeed";
 import { LineInsightsPanel } from "../components/game/LineInsightsPanel";
@@ -20,7 +21,8 @@ import { PlayLayout } from "../components/layout/PlayLayout";
 import { ReplayScrubber } from "../components/ReplayScrubber";
 import { RulesDialog } from "../components/RulesDialog";
 import { useBoardKeyboard } from "../hooks/useBoardKeyboard";
-import { useBotPlayer } from "../hooks/useBotPlayer";
+import { useBotPlayer, type BotPlayerConfig } from "../hooks/useBotPlayer";
+import { useLineCelebrations } from "../hooks/useLineCelebrations";
 import { useDebouncedInsights } from "../hooks/useDebouncedInsights";
 import { useGameKeyboard } from "../hooks/useGameKeyboard";
 import { useGameAudio } from "../hooks/useGameAudio";
@@ -52,18 +54,60 @@ import {
 } from "../store/gameStore";
 
 export function PlayPage() {
-  useGameKeyboard();
   const [settings, setSettings] = useState<AppSettings>(() => loadSettings());
   const effectiveMode: GameMode =
     isSandboxMode() ? "sandbox" : settings.gameMode;
   const isVsBot = effectiveMode === "vsBot";
+  const isBotSpectator = effectiveMode === "botSpectator";
   const reducedMotion = useReducedMotion(settings.reduceMotion);
+  const sounds = useGameAudio(settings);
+  const { activeEvents, celebrationHoldMsRef, onPlyScored } =
+    useLineCelebrations(reducedMotion, sounds.playLevel5Celebrate);
+
+  const botConfig = useMemo((): BotPlayerConfig => {
+    if (isVsBot) {
+      return {
+        automation: "vsBot",
+        difficulty: settings.botDifficulty,
+        humanSeat: settings.humanSeat,
+        celebrationHoldMsRef,
+      };
+    }
+    if (isBotSpectator) {
+      return {
+        automation: "spectator",
+        p1Difficulty: settings.botP1Difficulty,
+        p2Difficulty: settings.botP2Difficulty,
+        autoPlay: settings.spectatorAutoPlay,
+        paceMs: settings.spectatorPaceMs,
+        celebrationHoldMsRef,
+      };
+    }
+    return { automation: "off" };
+  }, [
+    isVsBot,
+    isBotSpectator,
+    settings.botDifficulty,
+    settings.humanSeat,
+    settings.botP1Difficulty,
+    settings.botP2Difficulty,
+    settings.spectatorAutoPlay,
+    settings.spectatorPaceMs,
+    celebrationHoldMsRef,
+  ]);
+
+  const {
+    botThinking,
+    botStatus,
+    thinkingPlayer,
+  } = useBotPlayer(botConfig);
+
   usePlayTutorial(
     settings.showTutorialOnPlay &&
       effectiveMode !== "sandbox" &&
+      effectiveMode !== "botSpectator" &&
       !reducedMotion,
   );
-  const sounds = useGameAudio(settings);
   const gridRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [importError, setImportError] = useState<string | null>(null);
@@ -98,17 +142,21 @@ export function PlayPage() {
   const heldTile = phase.kind === "place" ? phase.selected : null;
   const placing = phase.kind === "place";
 
-  const { botThinking } = useBotPlayer(
-    effectiveMode,
-    settings.botDifficulty,
-    settings.humanSeat,
-  );
   const humanCanAct = canHumanAct({
     isVsBot,
+    isBotSpectator,
     humanSeat: settings.humanSeat,
     activePlayer,
     botThinking,
   });
+
+  useGameKeyboard(humanCanAct);
+
+  useLayoutEffect(() => {
+    if (state.ply > prevPlyRef.current) {
+      onPlyScored(prevBoardRef.current, state.board);
+    }
+  }, [state.ply, state.board, onPlyScored]);
 
   useBoardKeyboard(gridRef, humanCanAct && placing);
 
@@ -194,6 +242,9 @@ export function PlayPage() {
   const startNewGame = () => {
     setScoreFeed([]);
     sounds.resetLineDebouncers();
+    if (effectiveMode === "botSpectator") {
+      updateSettings({ spectatorAutoPlay: true });
+    }
     const { first, settingsPatch } = resolveFirstPlayer(settings);
     if (Object.keys(settingsPatch).length > 0) {
       updateSettings(settingsPatch);
@@ -285,9 +336,17 @@ export function PlayPage() {
                 <GameModeControls
                   gameMode={settings.gameMode}
                   botDifficulty={settings.botDifficulty}
+                  botP1Difficulty={settings.botP1Difficulty}
+                  botP2Difficulty={settings.botP2Difficulty}
                   humanSeat={settings.humanSeat}
                   onModeChange={setGameMode}
                   onBotDifficulty={(d) => updateSettings({ botDifficulty: d })}
+                  onBotP1Difficulty={(d) =>
+                    updateSettings({ botP1Difficulty: d })
+                  }
+                  onBotP2Difficulty={(d) =>
+                    updateSettings({ botP2Difficulty: d })
+                  }
                   onHumanSeat={(seat: HumanSeat) => {
                     updateSettings({ humanSeat: seat });
                     startNewGame();
@@ -319,9 +378,25 @@ export function PlayPage() {
               arenaMoveLimitSec={settings.arenaMoveLimitSec}
               onCancelSelect={cancelSelect}
               isVsBot={isVsBot}
+              isBotSpectator={isBotSpectator}
+              spectatorPaused={isBotSpectator && !settings.spectatorAutoPlay}
               humanSeat={settings.humanSeat}
               botThinking={botThinking}
+              botStatus={botStatus}
+              thinkingPlayer={thinkingPlayer}
             />
+            {isBotSpectator && (
+              <SpectatorTransportControls
+                autoPlay={settings.spectatorAutoPlay}
+                paceMs={settings.spectatorPaceMs}
+                onAutoPlayChange={(playing) =>
+                  updateSettings({ spectatorAutoPlay: playing })
+                }
+                onPaceChange={(ms) =>
+                  updateSettings({ spectatorPaceMs: ms })
+                }
+              />
+            )}
             <LiveScorePanel
               levels={live.levels}
               leader={live.leader.leader}
@@ -339,7 +414,9 @@ export function PlayPage() {
             heldTile={heldTile}
             legalPlaces={places}
             highlightIndices={highlightIndices}
+            showDiagonalGuides={settings.showDiagOverlays}
             reduceMotion={reducedMotion}
+            celebrationEvents={activeEvents}
             onPlace={(index) => {
               if (!humanCanAct) return;
               sounds.playPlace();

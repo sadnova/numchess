@@ -52,10 +52,13 @@ self.onmessage = (event: MessageEvent<BotWorkerRequest>) => {
       ok: move !== null,
       usedFallback,
     };
+    if (import.meta.env.DEV && usedFallback) {
+      console.debug("[bot.worker] used legal-move fallback");
+    }
     self.postMessage(response);
   } catch (err) {
     try {
-      const { state, player } = event.data;
+      const { state } = event.data;
       const moves = getLegalCompoundMoves(state);
       const move = moves[0] ?? null;
       self.postMessage({

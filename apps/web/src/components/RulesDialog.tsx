@@ -25,12 +25,14 @@ export function RulesDialog({
         >
             <li>6×6 shared board; 36 placements total.</li>
             <li>
-              P1 (Rows) scores each row and the ↘ diagonal; P2 (Cols) scores
-              each column and the ↙ diagonal.
+              P1 (Rows) scores each row plus three ↘ diagonals (one main, two
+              5-cell flanks); P2 (Cols) scores each column plus three ↙
+              diagonals.
             </li>
             <li>
               Live score counts pattern levels on partial lines (filled cells
-              only); end-of-game uses full lines on the same sets.
+              only). At game end, rows/cols/main diags need 6 filled cells;
+              flank diags need 5.
             </li>
             <li>
               Each line awards repetition (R) and diversity (D) levels when

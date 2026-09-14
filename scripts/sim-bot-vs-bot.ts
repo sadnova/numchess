@@ -1,7 +1,7 @@
 import {
   applyCompoundMove,
+  chooseBotMove,
   createInitialState,
-  searchBestMove,
   searchOptionsForDifficulty,
   type GameState,
   type PlayerId,
@@ -10,11 +10,15 @@ import {
 function parseArgs() {
   let games = 50;
   let seed = 42;
+  let p1Level: "easy" | "medium" | "hard" = "hard";
+  let p2Level: "easy" | "medium" | "hard" = "medium";
   for (let i = 2; i < process.argv.length; i++) {
     if (process.argv[i] === "--games") games = Number(process.argv[++i]);
     if (process.argv[i] === "--seed") seed = Number(process.argv[++i]);
+    if (process.argv[i] === "--p1") p1Level = process.argv[++i] as typeof p1Level;
+    if (process.argv[i] === "--p2") p2Level = process.argv[++i] as typeof p2Level;
   }
-  return { games, seed };
+  return { games, seed, p1Level, p2Level };
 }
 
 function mulberry32(a: number) {
@@ -27,10 +31,13 @@ function mulberry32(a: number) {
   };
 }
 
-const opts = searchOptionsForDifficulty("medium");
+const { games, seed, p1Level, p2Level } = parseArgs();
+const optsP1 = searchOptionsForDifficulty(p1Level);
+const optsP2 = searchOptionsForDifficulty(p2Level);
 
 function botMove(state: GameState, player: PlayerId) {
-  return searchBestMove(state, player, opts);
+  const opts = player === 1 ? optsP1 : optsP2;
+  return chooseBotMove(state, player, opts);
 }
 
 function playGame(): 1 | 2 | "draw" {
@@ -49,7 +56,6 @@ function playGame(): 1 | 2 | "draw" {
     : state.phase.result.winner;
 }
 
-const { games, seed } = parseArgs();
 const rng = mulberry32(seed);
 let p1 = 0;
 let p2 = 0;
@@ -68,7 +74,8 @@ console.log(
     {
       games,
       seed,
-      options: opts,
+      p1Level,
+      p2Level,
       p1Wins: p1,
       p2Wins: p2,
       draws,

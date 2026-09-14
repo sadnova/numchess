@@ -77,6 +77,13 @@
       ],
       "volume": 0.7,
       "interrupt": true
+    },
+    "level_5_celebrate": {
+      "src": [
+        "/audio/wav/level_5_celebrate.wav"
+      ],
+      "volume": 0.82,
+      "interrupt": true
     }
   }
 }

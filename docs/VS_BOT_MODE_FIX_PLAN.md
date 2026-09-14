@@ -1,6 +1,6 @@
 # Vs bot mode — Reliability & UX fix plan
 
-**Status:** Draft v1 — ready to execute  
+**Status:** Partially shipped; **stall retry** closed in [BOT_VS_STALL_AND_1_2_0_PLAN.md](./BOT_VS_STALL_AND_1_2_0_PLAN.md) Phase A (`useBotPlayer` retry / timeout / banner)  
 **Scope:** `apps/web` (PlayPage, hooks, store, worker, UI) + small `packages/engine` surface (optional `applyCompoundMove` in store path)  
 **Parent:** [IMPLEMENTATION_PLAN.md](../IMPLEMENTATION_PLAN.md) §12, [docs/BOT_AI_IMPROVEMENT_PLAN.md](./BOT_AI_IMPROVEMENT_PLAN.md) (search strength — keep; fix delivery)  
 **Related:** [SPLIT_DIAGONALS_AND_LIVE_SCORING_V2_PLAN.md](./SPLIT_DIAGONALS_AND_LIVE_SCORING_V2_PLAN.md) (did **not** change bot wiring; confusion often coincides with 1.1.0 playtesting)

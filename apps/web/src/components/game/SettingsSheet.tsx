@@ -124,7 +124,8 @@ export function SettingsSheet({
             onChange={(v) => onChange({ showColOverlays: v })}
           />
           <SettingRow
-            label="Highlight diagonals"
+            label="Diagonal guides on board"
+            description="Thin outlines around diagonal cells, linked in the gaps"
             checked={settings.showDiagOverlays}
             onChange={(v) => onChange({ showDiagOverlays: v })}
           />

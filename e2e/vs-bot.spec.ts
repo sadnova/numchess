@@ -15,12 +15,15 @@ test("vs bot: bot moves after human without clicking bot inventory", async ({
     timeout: 3000,
   });
 
-  const plyBefore = await page.locator('[role="status"]').textContent();
+  const status = page.locator('[role="status"]');
+  await expect(async () => {
+    const text = (await status.textContent()) ?? "";
+    expect(text.trim()).not.toMatch(/^Player 2$/);
+  }).toPass({ timeout: 5000 });
+
   await expect(async () => {
     const cells = page.getByTestId(/^cell-/);
     const filled = await cells.filter({ hasNotText: "·" }).count();
     expect(filled).toBeGreaterThanOrEqual(2);
   }).toPass({ timeout: 20000 });
-
-  void plyBefore;
 });

@@ -1,5 +1,6 @@
 import type { Phase, TileValue } from "@numchess/engine";
 import type { HumanSeat } from "@/lib/persistence";
+import type { BotUiStatus } from "@/hooks/useBotPlayer";
 import { botSeatFor } from "@/lib/playVsBot";
 import { MatchClock } from "@/components/MatchClock";
 import { cn } from "@/lib/utils";
@@ -15,8 +16,12 @@ type TurnBannerProps = {
   arenaMoveLimitSec: number;
   onCancelSelect: () => void;
   isVsBot?: boolean;
+  isBotSpectator?: boolean;
+  spectatorPaused?: boolean;
   humanSeat?: HumanSeat;
   botThinking?: boolean;
+  botStatus?: BotUiStatus;
+  thinkingPlayer?: 1 | 2 | null;
 };
 
 export function TurnBanner({
@@ -30,19 +35,53 @@ export function TurnBanner({
   arenaMoveLimitSec,
   onCancelSelect,
   isVsBot = false,
+  isBotSpectator = false,
+  spectatorPaused = false,
   humanSeat = 1,
   botThinking = false,
+  botStatus = "idle",
+  thinkingPlayer = null,
 }: TurnBannerProps) {
   if (phase.kind === "ended" || activePlayer === null) return null;
 
   const botSeat = botSeatFor(humanSeat);
-  const isHumanTurn = !isVsBot || activePlayer === humanSeat;
+  const isHumanTurn =
+    !isBotSpectator && (!isVsBot || activePlayer === humanSeat);
 
   let headline: string;
-  if (isVsBot && !isHumanTurn && botThinking) {
-    headline = `Bot thinking… (Player ${botSeat})`;
+  let statusTestId: string | undefined;
+
+  if (isBotSpectator) {
+    if (spectatorPaused) {
+      headline = `Paused — Player ${activePlayer} to move`;
+      statusTestId = "turn-spectator-paused";
+    } else if (botStatus === "failed") {
+      headline = "Bot couldn't move — try New game";
+    } else if (botStatus === "retrying") {
+      headline = `P${activePlayer} finishing move…`;
+      statusTestId = "turn-bot-retrying";
+    } else if (botThinking || botStatus === "thinking") {
+      const side = (thinkingPlayer ?? activePlayer) === 1 ? "Rows" : "Cols";
+      headline = `P${thinkingPlayer ?? activePlayer} (${side}) thinking…`;
+      statusTestId = "turn-bot-thinking";
+    } else {
+      headline = `Player ${activePlayer} to move`;
+    }
   } else if (isVsBot && isHumanTurn) {
     headline = `Your turn — Player ${humanSeat}`;
+  } else if (isVsBot && !isHumanTurn) {
+    if (botStatus === "failed") {
+      headline = "Bot couldn't move — try New game";
+    } else if (botStatus === "retrying") {
+      headline = "Bot finishing move…";
+      statusTestId = "turn-bot-retrying";
+    } else if (botThinking || botStatus === "thinking") {
+      headline = `Bot thinking… (Player ${botSeat})`;
+      statusTestId = "turn-bot-thinking";
+    } else {
+      headline = `Bot thinking… (Player ${botSeat})`;
+      statusTestId = "turn-bot-thinking";
+    }
   } else {
     headline = `Player ${activePlayer}`;
   }
@@ -52,9 +91,7 @@ export function TurnBanner({
       className="text-center space-y-2 max-w-md w-full"
       role="status"
       aria-live="polite"
-      data-testid={
-        isVsBot && !isHumanTurn && botThinking ? "turn-bot-thinking" : undefined
-      }
+      data-testid={statusTestId}
     >
       <p className="text-lg font-medium text-text-primary">
         {headline}

@@ -5,13 +5,13 @@ import {
   scoreLinesFromBoard,
 } from "../src/index.js";
 
-describe("split diagonals (rulesVersion 1.1.0)", () => {
+describe("split diagonals (rulesVersion 1.2.0)", () => {
   it("rows perspective has diag-se only", () => {
     const ids = getScoringLines("rows").map((l) => l.id);
     expect(ids).toContain("diag-se");
     expect(ids).not.toContain("diag-sw");
     expect(ids.filter((id) => id.startsWith("row-"))).toHaveLength(6);
-    expect(ids).toHaveLength(7);
+    expect(ids).toHaveLength(9);
   });
 
   it("columns perspective has diag-sw only", () => {
@@ -19,7 +19,7 @@ describe("split diagonals (rulesVersion 1.1.0)", () => {
     expect(ids).toContain("diag-sw");
     expect(ids).not.toContain("diag-se");
     expect(ids.filter((id) => id.startsWith("col-"))).toHaveLength(6);
-    expect(ids).toHaveLength(7);
+    expect(ids).toHaveLength(9);
   });
 
   it("scores ↘ only toward rows", () => {

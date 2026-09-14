@@ -5,6 +5,7 @@ import {
   evaluatePosition,
   getLegalCompoundMoves,
   searchBestMove,
+  searchOptionsForDifficulty,
 } from "../src/index.js";
 
 describe("getLegalCompoundMoves", () => {
@@ -27,7 +28,10 @@ describe("applyCompoundMove", () => {
 describe("searchBestMove", () => {
   it("returns a legal compound move for player 1", () => {
     const s = createInitialState();
-    const move = searchBestMove(s, 1, { timeMs: 50, maxDepth: 2 });
+    const move = searchBestMove(s, 1, {
+      ...searchOptionsForDifficulty("medium"),
+      timeMs: 80,
+    });
     expect(move).not.toBeNull();
     const next = applyCompoundMove(s, move!);
     expect(next?.phase.kind === "select" && next.phase.player).toBe(2);

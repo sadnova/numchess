@@ -1,10 +1,13 @@
 import {
   applyAction,
   applyCompoundMove,
+  chooseBotMove,
   createInitialState,
   getLegalActions,
-  pickSearchMove,
+  RULES_VERSION,
+  searchOptionsForDifficulty,
   type GameState,
+  type SearchOptions,
 } from "@numchess/engine";
 
 function pickRandom<T>(arr: T[]): T {
@@ -29,13 +32,17 @@ function randomCompoundMove(state: GameState) {
 function parseArgs() {
   let games = 50;
   let seed = 42;
-  let botMs = 80;
+  let botMs: number | undefined = undefined;
+  let difficulty: "easy" | "medium" | "hard" = "medium";
   for (let i = 2; i < process.argv.length; i++) {
     if (process.argv[i] === "--games") games = Number(process.argv[++i]);
     if (process.argv[i] === "--seed") seed = Number(process.argv[++i]);
     if (process.argv[i] === "--bot-ms") botMs = Number(process.argv[++i]);
+    if (process.argv[i] === "--difficulty") {
+      difficulty = process.argv[++i] as "easy" | "medium" | "hard";
+    }
   }
-  return { games, seed, botMs };
+  return { games, seed, botMs, difficulty };
 }
 
 function mulberry32(a: number) {
@@ -48,11 +55,14 @@ function mulberry32(a: number) {
   };
 }
 
-function playGame(_rng: () => number, botMs: number): 1 | 2 | "draw" {
+function playGame(
+  _rng: () => number,
+  botOptions: SearchOptions,
+): 1 | 2 | "draw" {
   let state = createInitialState();
   while (state.phase.kind !== "ended") {
     if (state.phase.player === 2) {
-      const move = pickSearchMove(state, 2, botMs);
+      const move = chooseBotMove(state, 2, botOptions);
       if (!move) break;
       const next = applyCompoundMove(state, move);
       if (!next) break;
@@ -71,7 +81,12 @@ function playGame(_rng: () => number, botMs: number): 1 | 2 | "draw" {
     : state.phase.result.winner;
 }
 
-const { games, seed, botMs } = parseArgs();
+const { games, seed, botMs, difficulty } = parseArgs();
+const base = searchOptionsForDifficulty(difficulty);
+const botOptions: SearchOptions = {
+  ...base,
+  ...(botMs !== undefined ? { timeMs: botMs } : {}),
+};
 const rng = mulberry32(seed);
 let p2 = 0;
 let p1 = 0;
@@ -79,18 +94,24 @@ let draws = 0;
 
 for (let g = 0; g < games; g++) {
   void rng();
-  const w = playGame(rng, botMs);
+  const w = playGame(rng, botOptions);
   if (w === 2) p2++;
   else if (w === 1) p1++;
   else draws++;
+  if (games >= 10 && (g + 1) % 10 === 0) {
+    console.error(`sim:bot progress ${g + 1}/${games}`);
+  }
 }
 
 console.log(
   JSON.stringify(
     {
+      rulesVersion: RULES_VERSION,
       games,
       seed,
-      botMs,
+      difficulty,
+      botMs: botOptions.timeMs,
+      maxDepth: botOptions.maxDepth,
       botSeat: 2,
       botWins: p2,
       randomWins: p1,

@@ -56,6 +56,7 @@ export function evalInsightTerms(
 export function evaluatePosition(
   state: GameState,
   rootPlayer: PlayerId,
+  opts?: { fast?: boolean },
 ): number {
   if (state.phase.kind === "ended") {
     const r = state.phase.result;
@@ -70,9 +71,17 @@ export function evaluatePosition(
     return result.winner === rootPlayer ? WIN_SCORE : -WIN_SCORE;
   }
 
-  return (
-    evalLiveLevelDiff(state, rootPlayer) +
-    evalLexBonus(state, rootPlayer) +
-    evalInsightTerms(state, rootPlayer)
-  );
+  const material =
+    evalLiveLevelDiff(state, rootPlayer) + evalLexBonus(state, rootPlayer);
+  if (opts?.fast) return material;
+
+  return material + evalInsightTerms(state, rootPlayer);
+}
+
+/** Search static eval: live material + lex only (no insight bands). */
+export function evaluateStatic(
+  state: GameState,
+  rootPlayer: PlayerId,
+): number {
+  return evaluatePosition(state, rootPlayer, { fast: true });
 }

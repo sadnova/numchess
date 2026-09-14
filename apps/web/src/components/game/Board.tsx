@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import { forwardRef, useCallback, useState } from "react";
 import {
   BOARD_SIZE,
   indexToRowCol,
@@ -7,6 +7,12 @@ import {
 import type { GameState } from "@numchess/engine";
 import { tileValueClass } from "@/lib/tileStyles";
 import { cn } from "@/lib/utils";
+import {
+  DiagonalGuidesLegend,
+  DiagonalGuidesOverlay,
+} from "./DiagonalGuidesOverlay";
+import { LineCelebrationOverlay } from "./LineCelebrationOverlay";
+import type { LineCelebrationEvent } from "@/lib/lineCelebration";
 
 export type BoardProps = {
   state: GameState;
@@ -15,9 +21,11 @@ export type BoardProps = {
   heldTile: TileValue | null;
   legalPlaces: number[];
   highlightIndices?: number[];
+  showDiagonalGuides?: boolean;
   onPlace: (index: number) => void;
   reduceMotion?: boolean;
   interactionDisabled?: boolean;
+  celebrationEvents?: LineCelebrationEvent[];
 };
 
 export const Board = forwardRef<HTMLDivElement, BoardProps>(function Board(
@@ -28,31 +36,48 @@ export const Board = forwardRef<HTMLDivElement, BoardProps>(function Board(
     heldTile,
     legalPlaces,
     highlightIndices,
+    showDiagonalGuides = false,
     onPlace,
     reduceMotion = false,
     interactionDisabled = false,
+    celebrationEvents = [],
   },
   ref,
 ) {
+  const [gridEl, setGridEl] = useState<HTMLDivElement | null>(null);
+  const gridRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      setGridEl(node);
+      if (typeof ref === "function") ref(node);
+      else if (ref) ref.current = node;
+    },
+    [ref],
+  );
+
   return (
     <div
-      ref={ref}
-      data-testid="app-board"
-      role="grid"
-      aria-rowcount={BOARD_SIZE}
-      aria-colcount={BOARD_SIZE}
-      aria-label="Shared game board"
-      className={cn(
-        "grid gap-1.5 p-3 rounded-2xl border w-full max-w-[min(92vw,420px)] transition",
-        "shadow-[var(--shadow-panel)]",
-        placing
-          ? "bg-placement-muted border-amber-400/60 ring-2 ring-amber-400/25"
-          : "bg-surface-2/90 border-border-subtle",
-      )}
-      style={{
-        gridTemplateColumns: `repeat(${BOARD_SIZE}, minmax(44px, 1fr))`,
-      }}
+      data-testid="app-board-wrap"
+      className="w-full max-w-[min(92vw,420px)]"
     >
+      <div className="relative w-full">
+        <div
+          className={cn(
+            "relative z-[2] grid gap-1.5 p-3 rounded-2xl border w-full transition",
+            "shadow-[var(--shadow-panel)]",
+            placing
+              ? "bg-placement-muted border-amber-400/60 ring-2 ring-amber-400/25"
+              : "bg-surface-2/90 border-border-subtle",
+          )}
+          style={{
+            gridTemplateColumns: `repeat(${BOARD_SIZE}, minmax(44px, 1fr))`,
+          }}
+          ref={gridRef}
+          data-testid="app-board"
+          role="grid"
+          aria-rowcount={BOARD_SIZE}
+          aria-colcount={BOARD_SIZE}
+          aria-label="Shared game board"
+        >
       {Array.from({ length: BOARD_SIZE }, (_, row) => (
         <div role="row" aria-rowindex={row + 1} key={row} className="contents">
           {Array.from({ length: BOARD_SIZE }, (_, col) => {
@@ -111,6 +136,17 @@ export const Board = forwardRef<HTMLDivElement, BoardProps>(function Board(
           })}
         </div>
       ))}
+        </div>
+        {showDiagonalGuides && gridEl ? (
+          <DiagonalGuidesOverlay gridEl={gridEl} />
+        ) : null}
+        <LineCelebrationOverlay
+          gridEl={gridEl}
+          events={celebrationEvents}
+          reduceMotion={reduceMotion}
+        />
+      </div>
+      <DiagonalGuidesLegend visible={showDiagonalGuides} />
     </div>
   );
 });

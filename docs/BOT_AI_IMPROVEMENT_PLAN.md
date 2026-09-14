@@ -2,8 +2,10 @@
 
 **Status:** Draft v2 — ready to execute  
 **Scope:** `@numchess/engine` (eval + search) + `scripts/*` sims + `apps/web` worker/difficulty  
-**Parent:** [IMPLEMENTATION_PLAN.md](../IMPLEMENTATION_PLAN.md) §12 (Phase 6 → **6b**), [docs/RULES.md](./RULES.md) (`rulesVersion` **1.1.0**), [docs/BALANCE.md](./BALANCE.md)  
-**Depends on:** [SPLIT_DIAGONALS_AND_LIVE_SCORING_V2_PLAN.md](./SPLIT_DIAGONALS_AND_LIVE_SCORING_V2_PLAN.md) (`scoreLiveLevels`, `scoreLinesFromBoard`, `lineScoreDelta`, 7 lines/side)
+**Parent:** [IMPLEMENTATION_PLAN.md](../IMPLEMENTATION_PLAN.md) §12 (Phase 6 → **6b**), [docs/RULES.md](./RULES.md) (`rulesVersion` **1.2.0**), [docs/BALANCE.md](./BALANCE.md)  
+**Depends on:** [SPLIT_DIAGONALS_AND_LIVE_SCORING_V2_PLAN.md](./SPLIT_DIAGONALS_AND_LIVE_SCORING_V2_PLAN.md), [FLANKING_DIAGONALS_1_2_0_PLAN.md](./FLANKING_DIAGONALS_1_2_0_PLAN.md) (9 lines/side)  
+**Follow-up:** [BOT_VS_STALL_AND_1_2_0_PLAN.md](./BOT_VS_STALL_AND_1_2_0_PLAN.md) — vs bot **stall** + flank-aware analysis + 1.2.0 sims (shipped)  
+**Next:** [BOT_SEARCH_REVAMP_V3_PLAN.md](./BOT_SEARCH_REVAMP_V3_PLAN.md) — **canonical** bot architecture (supersedes search sections here for implementation)
 
 ### Revision history
 

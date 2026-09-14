@@ -10,7 +10,7 @@ const KEY_TO_TILE: Record<string, TileValue> = {
   "5": 5,
 };
 
-export function useGameKeyboard() {
+export function useGameKeyboard(humanCanAct = true) {
   const cancelSelect = useGameStore((s) => s.cancelSelect);
   const undo = useGameStore((s) => s.undo);
   const selectTile = useGameStore((s) => s.selectTile);
@@ -26,7 +26,7 @@ export function useGameKeyboard() {
         e.preventDefault();
         undo();
       }
-      if (phase.kind === "select" && !e.ctrlKey && !e.metaKey) {
+      if (phase.kind === "select" && humanCanAct && !e.ctrlKey && !e.metaKey) {
         const tile = KEY_TO_TILE[e.key];
         if (tile && canSelectTile(state, tile)) {
           e.preventDefault();
@@ -36,5 +36,5 @@ export function useGameKeyboard() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [cancelSelect, undo, selectTile, phase.kind, state]);
+  }, [cancelSelect, undo, selectTile, phase.kind, state, humanCanAct]);
 }

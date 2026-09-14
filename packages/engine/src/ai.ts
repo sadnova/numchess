@@ -5,7 +5,7 @@ export {
   sameCompoundMove,
   type CompoundMove,
 } from "./ai-moves.js";
-export { evalInsightTerms, evalLiveLevelDiff, evaluatePosition } from "./ai-eval.js";
+export { evalInsightTerms, evalLiveLevelDiff, evaluatePosition, evaluateStatic } from "./ai-eval.js";
 export { contributionDeltaScore, sortCompoundMoves } from "./ai-ordering.js";
 export {
   pickSearchMove,

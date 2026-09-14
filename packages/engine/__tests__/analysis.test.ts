@@ -27,28 +27,49 @@ describe("cancelSelection", () => {
 });
 
 describe("canReachL5OnLine", () => {
-  it("needs a tile in inventory for the last slot", () => {
+  it("needs a tile in inventory for the last slot (6-cell)", () => {
     const partial: TileValue[] = [5, 5, 5, 5, 5];
     const emptyInv = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-    expect(canReachL5OnLine(partial, 1, emptyInv)).toBe(false);
+    expect(canReachL5OnLine(partial, 1, emptyInv, 6)).toBe(false);
     expect(
-      canReachL5OnLine(partial, 1, { 1: 0, 2: 0, 3: 0, 4: 0, 5: 1 }),
+      canReachL5OnLine(partial, 1, { 1: 0, 2: 0, 3: 0, 4: 0, 5: 1 }, 6),
+    ).toBe(true);
+  });
+
+  it("supports 5-cell flank lines (B1)", () => {
+    const partial: TileValue[] = [1, 2, 3, 4];
+    const emptyInv = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    expect(canReachL5OnLine(partial, 1, emptyInv, 5)).toBe(false);
+    expect(
+      canReachL5OnLine(partial, 1, { 1: 0, 2: 0, 3: 0, 4: 0, 5: 1 }, 5),
     ).toBe(true);
   });
 });
 
 describe("classifyLineBand ghost threat", () => {
-  it("downgrades critical-looking line when no tiles remain", () => {
+  it("downgrades critical-looking line when no tiles remain (6-cell)", () => {
     const cells: TileValue[] = [5, 5, 5, 5, 5];
     const emptyInv = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-    expect(classifyLineBand(cells, emptyInv)).toBe("threat");
+    expect(classifyLineBand(cells, emptyInv, 6)).toBe("threat");
+  });
+
+  it("downgrades 4/5 flank ghost when finishing tile missing (B2)", () => {
+    const cells: TileValue[] = [5, 5, 5, 5];
+    const emptyInv = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    expect(classifyLineBand(cells, emptyInv, 5)).toBe("threat");
+  });
+
+  it("marks 4/5 flank critical when tile exists", () => {
+    const cells: TileValue[] = [1, 2, 3, 4];
+    const inv = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 2 };
+    expect(classifyLineBand(cells, inv, 5)).toBe("critical");
   });
 });
 
 describe("analyzePositionForPlayer", () => {
-  it("returns 8 insights", () => {
+  it("returns 9 insights", () => {
     const insights = analyzePositionForPlayer(createInitialState(), 1);
-    expect(insights).toHaveLength(7);
+    expect(insights).toHaveLength(9);
   });
 
   it("marks a nearly complete line as critical when tile exists", () => {

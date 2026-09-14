@@ -1,4 +1,4 @@
-export const RULES_VERSION = "1.1.0";
+export const RULES_VERSION = "1.2.0";
 
 export const BOARD_SIZE = 6;
 export const CELL_COUNT = BOARD_SIZE * BOARD_SIZE;

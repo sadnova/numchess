@@ -1,4 +1,4 @@
-# Numchess Classic — Rules (rulesVersion 1.1.0)
+# Numchess Classic — Rules (rulesVersion 1.2.0)
 
 ## Setup
 
@@ -15,12 +15,14 @@
 
 | Player | Lines |
 |--------|--------|
-| **Player 1 (Rows)** | 6 rows + main diagonal ↘ (7 lines) |
-| **Player 2 (Cols)** | 6 columns + main diagonal ↙ (7 lines) |
+| **Player 1 (Rows)** | 6 rows + main diagonal ↘ + two parallel ↘ lines (5 cells each) — **9 lines** |
+| **Player 2 (Cols)** | 6 columns + main diagonal ↙ + two parallel ↙ lines (5 cells each) — **9 lines** |
+
+One tile can count toward **several of your lines** at once (e.g. a row and a diagonal through the same cell).
 
 ## Pattern on a line
 
-For **live** scoring during play, use only **filled** cells on that line (partial lines count). At **game end**, each line must be full (6 cells) before it is scored officially—the same R/D rules apply to the filled segment during play and to the full line at end.
+For **live** scoring during play, use only **filled** cells on that line (partial lines count). At **game end**, a line counts when **every cell on that line’s path is filled** (6 cells for rows/columns/main diagonals; **5 cells** for the shorter parallel diagonals). The same R/D rules apply to the filled segment during play and to the full line at end.
 
 For a line segment (partial or full):
 
@@ -42,5 +44,6 @@ Player 1 uses **row** totals; Player 2 uses **column** totals.
 
 ## Changelog
 
+- **1.2.0** — Flanking 5-cell diagonals (two per side, parallel to main ↘/↙); 11 scoring lines per player.
 - **1.1.0** — Split diagonals (↘ → Rows, ↙ → Cols); live scoring from partial filled lines.
 - **1.0.0** — Shared diagonals for both players; coexistence (R,D) scoring (replaces prototype scorer).

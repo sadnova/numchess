@@ -19,7 +19,7 @@ export {
   combinedInventoryCounts,
 } from "./analysis.js";
 export type { LineInsight, ThreatBand } from "./analysis.js";
-export { getFilledLineCells, getLineCells, getScoringLines, indexToRowCol, rowColToIndex } from "./lines.js";
+export { getFilledLineCells, getLineCells, getScoringLines, indexToRowCol, indicesWithRowMinusCol, indicesWithRowPlusCol, rowColToIndex } from "./lines.js";
 export {
   addContributions,
   analyzeLine,
@@ -78,6 +78,7 @@ export {
   evalInsightTerms,
   evalLiveLevelDiff,
   evaluatePosition,
+  evaluateStatic,
   getLegalCompoundMoves,
   chooseBotMove,
   pickSearchMove,

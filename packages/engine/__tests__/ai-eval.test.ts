@@ -8,6 +8,7 @@ import {
   getScoringLines,
   scoreLiveLevels,
 } from "../src/index.js";
+import { blocksOpponentCritical } from "../src/ai-ordering.js";
 import type { CellValue } from "../src/types.js";
 
 describe("evalLiveLevelDiff / evaluatePosition invariants", () => {
@@ -38,6 +39,16 @@ describe("evalLiveLevelDiff / evaluatePosition invariants", () => {
     const live = scoreLiveLevels(s);
     expect(live.rows[5]).toBeGreaterThanOrEqual(1);
   });
+
+  it("G12: diag-se-ne flank fill increases P1 eval only", () => {
+    const board = Array(36).fill(null) as CellValue[];
+    const flank = getScoringLines("rows").find((l) => l.id === "diag-se-ne")!
+      .indices;
+    for (let i = 0; i < 5; i++) board[flank[i]!] = (i + 1) as 1 | 2 | 3 | 4 | 5;
+    const s = { ...createInitialState(), board };
+    expect(evalLiveLevelDiff(s, 1)).toBeGreaterThan(0);
+    expect(evalLiveLevelDiff(s, 2)).toBeLessThan(0);
+  });
 });
 
 describe("search ordering smoke G1", () => {
@@ -55,5 +66,24 @@ describe("search ordering smoke G1", () => {
       scoreLiveLevels(next!).columns,
     );
     expect(winner).toBe(1);
+  });
+
+  it("blocksOpponentCritical detects single empty on 5-cell flank (B5)", () => {
+    const board = Array(36).fill(null) as CellValue[];
+    const flank = getScoringLines("columns").find((l) => l.id === "diag-sw-nw")!
+      .indices;
+    for (let i = 0; i < 4; i++) board[flank[i]!] = (i + 1) as 1 | 2 | 3 | 4;
+    let s = createInitialState();
+    s = {
+      ...s,
+      board,
+      phase: { kind: "select", player: 1 },
+      inventories: [
+        { counts: { 1: 2, 2: 2, 3: 2, 4: 2, 5: 2 } },
+        { counts: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 1 } },
+      ],
+    };
+    const blockMove = { select: 3 as const, place: flank[4]! };
+    expect(blocksOpponentCritical(s, blockMove)).toBe(1);
   });
 });

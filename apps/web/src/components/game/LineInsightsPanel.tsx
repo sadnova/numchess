@@ -59,7 +59,7 @@ export function LineInsightsPanel({
               onOverlayChange({ showDiagOverlays: e.target.checked })
             }
           />
-          Diags
+            Diags (lines on board)
         </label>
       </div>
       <ul className="space-y-1 max-h-48 overflow-y-auto">
@@ -79,7 +79,8 @@ export function LineInsightsPanel({
               <span className="text-text-primary truncate">{line.label}</span>
               <span className="flex items-center gap-2 shrink-0 tile-num">
                 <span className="text-text-muted">
-                  {line.filled}/6 · R{line.analysis.R} D{line.analysis.D}
+                  {line.filled}/{line.lineLength} · R{line.analysis.R} D
+                  {line.analysis.D}
                 </span>
                 <span
                   className={threatBandBadgeClass(line.band)}

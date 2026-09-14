@@ -6,6 +6,7 @@ export type SfxId =
   | "line_lock"
   | "level_4"
   | "level_5"
+  | "level_5_celebrate"
   | "lead_change"
   | "end_win"
   | "end_draw"

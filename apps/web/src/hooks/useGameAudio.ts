@@ -64,6 +64,17 @@ export function useGameAudio(settings: AppSettings) {
   const playPlace = useCallback(() => play("place"), [play]);
   const playUndo = useCallback(() => play("undo"), [play]);
 
+  const playLevel5Celebrate = useCallback(() => {
+    if (settings.muteSound) return;
+    if (!settings.sfxLevelFanfare && !settings.sfxCelebration) return;
+    withUnlock(() => playSfx("level_5_celebrate"));
+  }, [
+    settings.muteSound,
+    settings.sfxLevelFanfare,
+    settings.sfxCelebration,
+    withUnlock,
+  ]);
+
   const playLineLockFanfare = useCallback(
     (delta: {
       player1: LineLedgerEntry[];
@@ -86,8 +97,9 @@ export function useGameAudio(settings: AppSettings) {
           if (settings.sfxLineLock) playSfx("line_lock");
           if (settings.sfxLevelFanfare) {
             const max = maxContributionLevel(entry.analysis.contributions);
-            if (max === 5) playSfx("level_5");
-            else if (max === 4) playSfx("level_4");
+            if (max === 5) {
+              /* level_5_celebrate plays with board FX via playLevel5Celebrate */
+            } else if (max === 4) playSfx("level_4");
           }
         });
       }
@@ -134,6 +146,7 @@ export function useGameAudio(settings: AppSettings) {
       playPlace,
       playUndo,
       playLineLockFanfare,
+      playLevel5Celebrate,
       playLeadChange,
       playEnd,
       resetLineDebouncers,
@@ -144,6 +157,7 @@ export function useGameAudio(settings: AppSettings) {
       playPlace,
       playUndo,
       playLineLockFanfare,
+      playLevel5Celebrate,
       playLeadChange,
       playEnd,
       resetLineDebouncers,

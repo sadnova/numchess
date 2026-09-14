@@ -56,7 +56,7 @@ export function HomePage() {
             Numchess Ultimate
           </h1>
           <p className="text-base sm:text-lg text-text-muted max-w-lg mx-auto leading-relaxed">
-            One shared board. Player 1 owns rows and ↘; Player 2 owns columns and ↙.
+            One shared board. Player 1 owns rows and three ↘ lines; Player 2 owns columns and three ↙ lines.
             Pattern levels—not tile values—decide the winner.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">

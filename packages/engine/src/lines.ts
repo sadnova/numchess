@@ -18,8 +18,32 @@ function colIndices(c: number): number[] {
   return Array.from({ length: BOARD_SIZE }, (_, r) => r * BOARD_SIZE + c);
 }
 
-const DIAG_SE = [0, 7, 14, 21, 28, 35];
-const DIAG_SW = [5, 10, 15, 20, 25, 30];
+/** All board indices with (row - col) === k, in increasing row order. */
+export function indicesWithRowMinusCol(k: number): number[] {
+  const out: number[] = [];
+  for (let row = 0; row < BOARD_SIZE; row++) {
+    const col = row - k;
+    if (col >= 0 && col < BOARD_SIZE) out.push(row * BOARD_SIZE + col);
+  }
+  return out;
+}
+
+/** All board indices with (row + col) === k, in increasing row order. */
+export function indicesWithRowPlusCol(k: number): number[] {
+  const out: number[] = [];
+  for (let row = 0; row < BOARD_SIZE; row++) {
+    const col = k - row;
+    if (col >= 0 && col < BOARD_SIZE) out.push(row * BOARD_SIZE + col);
+  }
+  return out;
+}
+
+const DIAG_SE = indicesWithRowMinusCol(0);
+const DIAG_SE_NE = indicesWithRowMinusCol(-1);
+const DIAG_SE_SW = indicesWithRowMinusCol(1);
+const DIAG_SW = indicesWithRowPlusCol(5);
+const DIAG_SW_NW = indicesWithRowPlusCol(4);
+const DIAG_SW_SE = indicesWithRowPlusCol(6);
 
 /** Filled tile values along line indices, in index order (partial lines OK). */
 export function getFilledLineCells(
@@ -44,6 +68,16 @@ export function getScoringLines(perspective: Perspective): ScoringLine[] {
       label: "Diagonal ↘",
       indices: [...DIAG_SE],
     });
+    lines.push({
+      id: "diag-se-ne",
+      label: "↘ upper",
+      indices: [...DIAG_SE_NE],
+    });
+    lines.push({
+      id: "diag-se-sw",
+      label: "↘ lower",
+      indices: [...DIAG_SE_SW],
+    });
   } else {
     for (let c = 0; c < BOARD_SIZE; c++) {
       lines.push({
@@ -56,6 +90,16 @@ export function getScoringLines(perspective: Perspective): ScoringLine[] {
       id: "diag-sw",
       label: "Diagonal ↙",
       indices: [...DIAG_SW],
+    });
+    lines.push({
+      id: "diag-sw-nw",
+      label: "↙ upper",
+      indices: [...DIAG_SW_NW],
+    });
+    lines.push({
+      id: "diag-sw-se",
+      label: "↙ lower",
+      indices: [...DIAG_SW_SE],
     });
   }
   return lines;

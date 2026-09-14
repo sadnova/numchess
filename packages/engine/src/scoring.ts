@@ -14,11 +14,10 @@ import type {
 import { compareLevelCounts } from "./winner.js";
 
 export function isLineComplete(board: CellValue[], indices: number[]): boolean {
-  if (indices.length !== 6) return false;
   for (const i of indices) {
     if (board[i] === null) return false;
   }
-  return true;
+  return indices.length > 0;
 }
 
 function scoreCompletedPerspective(
@@ -31,7 +30,7 @@ function scoreCompletedPerspective(
   for (const line of getScoringLines(perspective)) {
     if (!isLineComplete(board, line.indices)) continue;
     const cells = getLineCells(board, line.indices);
-    if (cells.length !== 6) continue;
+    if (cells.length !== line.indices.length) continue;
     const analysis = analyzeLine(cells);
     addContributions(counts, analysis.contributions);
     ledger.push({
@@ -73,7 +72,7 @@ function newlyCompletedEntries(
       continue;
     }
     const cells = getLineCells(nextBoard, line.indices);
-    if (cells.length !== 6) continue;
+    if (cells.length !== line.indices.length) continue;
     const analysis = analyzeLine(cells);
     entries.push({
       id: line.id,
@@ -189,7 +188,7 @@ export function scorePerspective(
   const ledger: LineLedgerEntry[] = [];
   for (const line of getScoringLines(perspective)) {
     const cells = getLineCells(board, line.indices);
-    if (cells.length !== 6) {
+    if (cells.length !== line.indices.length) {
       throw new Error(`Line ${line.id} incomplete at scoring time`);
     }
     const analysis = analyzeLine(cells);

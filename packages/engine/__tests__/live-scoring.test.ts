@@ -27,6 +27,14 @@ describe("isLineComplete", () => {
     for (let i = 0; i < 6; i++) board[row0[i]!] = i + 1;
     expect(isLineComplete(board, row0)).toBe(true);
   });
+
+  it("true when all five flank cells filled", () => {
+    const board = Array(36).fill(null) as (number | null)[];
+    const flank = getScoringLines("rows").find((l) => l.id === "diag-se-ne")!
+      .indices;
+    for (let i = 0; i < 5; i++) board[flank[i]!] = i + 1;
+    expect(isLineComplete(board, flank)).toBe(true);
+  });
 });
 
 describe("scoreLiveLevels", () => {

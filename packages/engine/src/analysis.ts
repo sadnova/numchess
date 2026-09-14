@@ -18,6 +18,7 @@ export interface LineInsight {
   lineId: string;
   label: string;
   filled: number;
+  lineLength: number;
   analysis: LineAnalysis;
   band: ThreatBand;
 }
@@ -51,15 +52,16 @@ function cloneCounts(
   return { ...counts };
 }
 
-/** Whether `slotsLeft` placements from `available` can complete a 6-cell line with R≥5 or D≥5. */
+/** Whether `slotsLeft` placements from `available` can complete a line with R≥5 or D≥5. */
 export function canReachL5OnLine(
   partial: TileValue[],
   slotsLeft: number,
   available: Record<TileValue, number>,
+  lineLength = 6,
 ): boolean {
-  if (slotsLeft < 0 || partial.length + slotsLeft !== 6) return false;
+  if (slotsLeft < 0 || partial.length + slotsLeft !== lineLength) return false;
   if (slotsLeft === 0) {
-    if (partial.length !== 6) return false;
+    if (partial.length !== lineLength) return false;
     const a = analyzeLine(partial);
     return a.R >= 5 || a.D >= 5;
   }
@@ -67,7 +69,7 @@ export function canReachL5OnLine(
     if (available[v] <= 0) continue;
     const next = cloneCounts(available);
     next[v] -= 1;
-    if (canReachL5OnLine([...partial, v], slotsLeft - 1, next)) {
+    if (canReachL5OnLine([...partial, v], slotsLeft - 1, next, lineLength)) {
       return true;
     }
   }
@@ -77,13 +79,14 @@ export function canReachL5OnLine(
 export function classifyLineBand(
   cells: TileValue[],
   inventory: Record<TileValue, number>,
+  lineLength = 6,
 ): ThreatBand {
   const filled = cells.length;
   if (filled === 0) return "safe";
 
   const analysis = analyzePartialLine(cells);
-  const slotsLeft = 6 - filled;
-  const achievableL5 = canReachL5OnLine(cells, slotsLeft, inventory);
+  const slotsLeft = lineLength - filled;
+  const achievableL5 = canReachL5OnLine(cells, slotsLeft, inventory, lineLength);
   const onBoardDecisive =
     filled >= 5 && (analysis.R >= 5 || analysis.D >= 5);
 
@@ -145,8 +148,9 @@ function analyzePositionForPlayerRaw(
       lineId: line.id,
       label: line.label,
       filled: cells.length,
+      lineLength: line.indices.length,
       analysis,
-      band: classifyLineBand(cells, inventory),
+      band: classifyLineBand(cells, inventory, line.indices.length),
     });
   }
   return insights;

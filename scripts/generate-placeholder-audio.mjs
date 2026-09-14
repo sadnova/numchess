@@ -6,13 +6,13 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
+const sampleRate = 44100;
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "apps", "web", "public", "audio");
 const wavDir = join(root, "wav");
 mkdirSync(wavDir, { recursive: true });
 
-function writeTone(name, freq, durationSec, gain = 0.25) {
-  const sampleRate = 44100;
-  const n = Math.floor(sampleRate * durationSec);
+function writeWav(name, samples) {
+  const n = samples.length;
   const data = Buffer.alloc(44 + n * 2);
   data.write("RIFF", 0);
   data.writeUInt32LE(36 + n * 2, 4);
@@ -28,12 +28,46 @@ function writeTone(name, freq, durationSec, gain = 0.25) {
   data.write("data", 36);
   data.writeUInt32LE(n * 2, 40);
   for (let i = 0; i < n; i++) {
-    const t = i / sampleRate;
-    const env = Math.min(1, t * 40) * Math.max(0, 1 - (t - durationSec * 0.6) / (durationSec * 0.4));
-    const sample = Math.sin(2 * Math.PI * freq * t) * gain * env;
-    data.writeInt16LE(Math.max(-32768, Math.min(32767, Math.floor(sample * 32767))), 44 + i * 2);
+    const s = samples[i] ?? 0;
+    data.writeInt16LE(
+      Math.max(-32768, Math.min(32767, Math.floor(s * 32767))),
+      44 + i * 2,
+    );
   }
   writeFileSync(join(wavDir, `${name}.wav`), data);
+}
+
+function writeTone(name, freq, durationSec, gain = 0.25) {
+  const n = Math.floor(sampleRate * durationSec);
+  const samples = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    const t = i / sampleRate;
+    const env =
+      Math.min(1, t * 40) *
+      Math.max(0, 1 - (t - durationSec * 0.6) / (durationSec * 0.4));
+    samples[i] = Math.sin(2 * Math.PI * freq * t) * gain * env;
+  }
+  writeWav(name, samples);
+}
+
+/** Rising arpeggio for L5 board celebration */
+function writeArpeggio(name, freqs, noteSec, gain = 0.2) {
+  const gap = noteSec * 0.15;
+  const totalSec = freqs.length * noteSec + gap * (freqs.length - 1);
+  const n = Math.floor(sampleRate * totalSec);
+  const samples = new Float64Array(n);
+  let offset = 0;
+  for (const freq of freqs) {
+    const noteSamples = Math.floor(sampleRate * noteSec);
+    for (let i = 0; i < noteSamples && offset + i < n; i++) {
+      const t = i / sampleRate;
+      const env =
+        Math.min(1, t * 60) * Math.max(0, 1 - (t - noteSec * 0.55) / (noteSec * 0.45));
+      samples[offset + i] = (samples[offset + i] ?? 0) + Math.sin(2 * Math.PI * freq * t) * gain * env;
+    }
+    offset += noteSamples + Math.floor(sampleRate * gap);
+  }
+  writeWav(name, samples);
 }
 
 const tones = [
@@ -54,14 +88,30 @@ for (const [name, freq, dur] of tones) {
   writeTone(name, freq, dur);
 }
 
+writeArpeggio("level_5_celebrate", [523.25, 659.25, 783.99, 987.77, 1174.66], 0.09, 0.22);
+
+const manifestEntries = [
+  ...tones.map(([name]) => [
+    name,
+    {
+      src: [`/audio/wav/${name}.wav`],
+      volume: name.startsWith("end_") ? 0.85 : 0.7,
+      interrupt: true,
+    },
+  ]),
+  [
+    "level_5_celebrate",
+    {
+      src: ["/audio/wav/level_5_celebrate.wav"],
+      volume: 0.82,
+      interrupt: true,
+    },
+  ],
+];
+
 const manifest = {
   version: 1,
-  sources: Object.fromEntries(
-    tones.map(([name]) => [
-      name,
-      { src: [`/audio/wav/${name}.wav`], volume: name.startsWith("end_") ? 0.85 : 0.7, interrupt: true },
-    ]),
-  ),
+  sources: Object.fromEntries(manifestEntries),
 };
 
 writeFileSync(join(root, "manifest.json"), JSON.stringify(manifest, null, 2));

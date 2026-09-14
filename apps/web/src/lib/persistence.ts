@@ -7,7 +7,15 @@ import {
 const RESUME_KEY = "numchess-resume";
 const SETTINGS_KEY = "numchess-settings";
 
-export type GameMode = "local2p" | "vsBot" | "sandbox";
+const GAME_MODES = ["local2p", "vsBot", "botSpectator", "sandbox"] as const;
+export type GameMode = (typeof GAME_MODES)[number];
+
+function parseGameMode(value: unknown): GameMode {
+  if (typeof value === "string" && (GAME_MODES as readonly string[]).includes(value)) {
+    return value as GameMode;
+  }
+  return "local2p";
+}
 
 export type BotDifficulty = "easy" | "medium" | "hard";
 
@@ -19,6 +27,10 @@ export interface AppSettings {
   showDiagOverlays: boolean;
   gameMode: GameMode;
   botDifficulty: BotDifficulty;
+  botP1Difficulty: BotDifficulty;
+  botP2Difficulty: BotDifficulty;
+  spectatorAutoPlay: boolean;
+  spectatorPaceMs: number;
   humanSeat: HumanSeat;
   muteSound: boolean;
   sfxVolume: number;
@@ -41,6 +53,10 @@ const DEFAULT_SETTINGS: AppSettings = {
   showDiagOverlays: true,
   gameMode: "local2p",
   botDifficulty: "medium",
+  botP1Difficulty: "hard",
+  botP2Difficulty: "medium",
+  spectatorAutoPlay: true,
+  spectatorPaceMs: 400,
   humanSeat: 1,
   muteSound: false,
   sfxVolume: 0.7,
@@ -69,7 +85,11 @@ export function loadSettings(): AppSettings {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (!raw) return { ...DEFAULT_SETTINGS };
     const parsed = JSON.parse(raw) as Partial<AppSettings>;
-    return { ...DEFAULT_SETTINGS, ...parsed };
+    return {
+      ...DEFAULT_SETTINGS,
+      ...parsed,
+      gameMode: parseGameMode(parsed.gameMode),
+    };
   } catch {
     return { ...DEFAULT_SETTINGS };
   }
