@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { ArrowRight, BookOpen } from "lucide-react";
+import { NumchessLogo } from "@/components/NumchessLogo";
 import { RulesDialog } from "@/components/RulesDialog";
 import { Button } from "@/components/ui/Button";
 
@@ -35,7 +36,19 @@ export function HomePage() {
         tabIndex={-1}
         className="max-w-2xl mx-auto px-6 py-10 sm:py-16 flex flex-col gap-10 outline-none"
       >
-        <header className="text-center space-y-4">
+        <header className="text-center space-y-5">
+          <div className="flex justify-center pt-2">
+            <div className="relative">
+              <div
+                className="pointer-events-none absolute -inset-6 rounded-[2.5rem] bg-gradient-to-br from-accent-rows/20 via-transparent to-accent-cols/25 blur-2xl opacity-80"
+                aria-hidden
+              />
+              <NumchessLogo
+                variant="hero"
+                className="relative h-36 w-36 sm:h-44 sm:w-44 drop-shadow-[0_16px_40px_oklch(0.22_0.04_260/0.15)]"
+              />
+            </div>
+          </div>
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-accent-rows">
             Abstract · 6×6 · Two players
           </p>

@@ -7,9 +7,8 @@ test("app loads and shows board", async ({ page }) => {
   await expect(page.getByTestId("inventory-p1")).toBeVisible();
 });
 
-test("home links to play", async ({ page }) => {
+test("root redirects to play", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByTestId("home-page")).toBeVisible();
-  await page.getByTestId("play-link").click();
+  await expect(page).toHaveURL(/\/play/);
   await expect(page.getByTestId("app-shell")).toBeVisible();
 });

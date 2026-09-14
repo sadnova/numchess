@@ -1,6 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { SkipLink } from "./components/layout/SkipLink";
-import { HomePage } from "./pages/HomePage";
 import { PlayPage } from "./pages/PlayPage";
 
 export default function App() {
@@ -8,9 +7,9 @@ export default function App() {
     <BrowserRouter>
       <SkipLink />
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<Navigate to="/play" replace />} />
         <Route path="/play" element={<PlayPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/play" replace />} />
       </Routes>
     </BrowserRouter>
   );

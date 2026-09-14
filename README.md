@@ -13,7 +13,7 @@ pnpm test
 pnpm dev
 ```
 
-Open http://localhost:5173 — choose **Play Classic**, or go to `/play` directly. Sandbox: `/play?sandbox=1`.
+Open http://localhost:5173 — `/` redirects to **Play** (`/play`). Sandbox: `/play?sandbox=1`.
 
 ## Workspace
 
