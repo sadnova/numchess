@@ -48,9 +48,8 @@ Prototype archived at `legacy/index.prototype.html`.
 ## Deploy (Vercel)
 
 1. Import [github.com/sadnova/numchess](https://github.com/sadnova/numchess) on [Vercel](https://vercel.com/new).
-2. Leave **Root Directory** empty (repo root). `vercel.json` sets install/build/output.
-3. **Node.js 22** (matches `.nvmrc` and CI).
+2. Set **Root Directory** to **`apps/web`** (Turbo monorepo). Vercel reads `apps/web/vercel.json` (`outputDirectory`: `dist`).
+3. If Root Directory stays at repo root instead, use root `vercel.json` (`outputDirectory`: `apps/web/dist`).
+4. **Node.js 22** (matches `.nvmrc` and CI).
 
-Production build: `pnpm turbo run build --filter=@numchess/web` → `apps/web/dist`.
-
-Client routes (`/`, `/play`) use SPA rewrites in `vercel.json`.
+Production build: `pnpm turbo run build --filter=@numchess/web`.
