@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "sources": {
+    "select": {
+      "src": [
+        "/audio/wav/select.wav"
+      ],
+      "volume": 0.7,
+      "interrupt": true
+    },
+    "place": {
+      "src": [
+        "/audio/wav/place.wav"
+      ],
+      "volume": 0.7,
+      "interrupt": true
+    },
+    "line_lock": {
+      "src": [
+        "/audio/wav/line_lock.wav"
+      ],
+      "volume": 0.7,
+      "interrupt": true
+    },
+    "level_4": {
+      "src": [
+        "/audio/wav/level_4.wav"
+      ],
+      "volume": 0.7,
+      "interrupt": true
+    },
+    "level_5": {
+      "src": [
+        "/audio/wav/level_5.wav"
+      ],
+      "volume": 0.7,
+      "interrupt": true
+    },
+    "lead_change": {
+      "src": [
+        "/audio/wav/lead_change.wav"
+      ],
+      "volume": 0.7,
+      "interrupt": true
+    },
+    "end_win": {
+      "src": [
+        "/audio/wav/end_win.wav"
+      ],
+      "volume": 0.85,
+      "interrupt": true
+    },
+    "end_draw": {
+      "src": [
+        "/audio/wav/end_draw.wav"
+      ],
+      "volume": 0.85,
+      "interrupt": true
+    },
+    "end_loss": {
+      "src": [
+        "/audio/wav/end_loss.wav"
+      ],
+      "volume": 0.85,
+      "interrupt": true
+    },
+    "undo": {
+      "src": [
+        "/audio/wav/undo.wav"
+      ],
+      "volume": 0.7,
+      "interrupt": true
+    },
+    "error": {
+      "src": [
+        "/audio/wav/error.wav"
+      ],
+      "volume": 0.7,
+      "interrupt": true
+    }
+  }
+}

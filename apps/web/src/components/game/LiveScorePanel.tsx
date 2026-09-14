@@ -1,0 +1,70 @@
+import type { LevelCountsPair } from "@numchess/engine";
+import { cn } from "@/lib/utils";
+
+const LEVELS = [5, 4, 3, 2] as const;
+
+export function LiveScorePanel({
+  levels,
+  leader,
+  decisiveLevel,
+  pulseKey,
+}: {
+  levels: LevelCountsPair;
+  leader: 1 | 2 | null;
+  decisiveLevel: 2 | 3 | 4 | 5 | null;
+  pulseKey?: string;
+}) {
+  return (
+    <section
+      className="w-full max-w-md rounded-xl border border-border-subtle bg-surface-2/50 px-3 py-2"
+      aria-label="Live score from completed lines"
+      data-testid="live-score-panel"
+    >
+      <div className="flex items-baseline justify-between gap-2 mb-1">
+        <p className="text-xs font-medium text-text-primary">Live score</p>
+        <p className="text-[10px] text-text-muted">Completed lines only</p>
+      </div>
+      <div className="grid grid-cols-[1fr_auto_1fr] gap-x-2 text-[10px] uppercase tracking-wide text-text-muted mb-1">
+        <span className="text-accent-rows text-right">Rows</span>
+        <span className="text-center">Lv</span>
+        <span className="text-accent-cols">Cols</span>
+      </div>
+      {LEVELS.map((lv) => (
+        <div
+          key={lv}
+          className={cn(
+            "grid grid-cols-[1fr_auto_1fr] gap-x-2 text-sm tile-num tabular-nums py-0.5",
+            pulseKey?.includes(`L${lv}`) && "animate-pulse",
+          )}
+        >
+          <span
+            className={cn(
+              "text-right font-semibold",
+              leader === 1 && decisiveLevel === lv
+                ? "text-accent-rows"
+                : "text-text-primary",
+            )}
+          >
+            {levels.rows[lv]}
+          </span>
+          <span className="text-center text-xs text-text-muted">L{lv}</span>
+          <span
+            className={cn(
+              "font-semibold",
+              leader === 2 && decisiveLevel === lv
+                ? "text-accent-cols"
+                : "text-text-primary",
+            )}
+          >
+            {levels.columns[lv]}
+          </span>
+        </div>
+      ))}
+      {leader !== null && decisiveLevel !== null && (
+        <p className="text-[11px] text-text-muted mt-1 text-center">
+          {leader === 1 ? "Rows" : "Cols"} lead at L{decisiveLevel}
+        </p>
+      )}
+    </section>
+  );
+}

@@ -1,0 +1,9 @@
+node_modules
+dist
+coverage
+.turbo
+.lighthouse
+*.log
+apps/web/dev-dist
+test-results
+.DS_Store

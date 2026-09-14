@@ -1,0 +1,177 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg-page: oklch(0.97 0.01 260);
+  --color-surface-1: oklch(1 0 0);
+  --color-surface-2: oklch(0.94 0.02 260);
+  --color-text-primary: oklch(0.25 0.03 260);
+  --color-text-muted: oklch(0.45 0.02 260);
+  --color-border-subtle: oklch(0.88 0.02 260);
+  --color-accent-rows: oklch(0.52 0.14 240);
+  --color-accent-cols: oklch(0.58 0.16 45);
+  --color-accent-action: oklch(0.48 0.14 240);
+  --color-placement: oklch(0.78 0.14 85);
+  --color-placement-muted: oklch(0.92 0.06 85);
+  --color-accent-rows-soft: oklch(0.92 0.04 240);
+  --color-accent-cols-soft: oklch(0.93 0.05 45);
+  --color-surface: var(--color-surface-1);
+  --radius-panel: 1rem;
+  --radius-cell: 0.75rem;
+  --font-sans: "DM Sans", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Syne", var(--font-sans);
+  --shadow-panel: 0 1px 3px oklch(0.2 0.02 260 / 0.08), 0 4px 12px oklch(0.2 0.02 260 / 0.06);
+  --shadow-cell-raised: 0 1px 2px oklch(0.2 0.02 260 / 0.12), 0 2px 6px oklch(0.2 0.02 260 / 0.08);
+}
+
+@keyframes place {
+  from {
+    transform: scale(0.85);
+    opacity: 0.5;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--color-bg-page);
+  color: var(--color-text-primary);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.tile-num {
+  font-variant-numeric: tabular-nums;
+}
+
+.value-pattern-1 {
+  background-image: radial-gradient(circle at 30% 30%, oklch(0.55 0.1 240 / 0.25), transparent 45%);
+}
+.value-pattern-2 {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 3px,
+    oklch(0.55 0.08 150 / 0.2) 3px,
+    oklch(0.55 0.08 150 / 0.2) 6px
+  );
+}
+.value-pattern-3 {
+  background-image: radial-gradient(circle, oklch(0.6 0.12 85 / 0.25) 1px, transparent 1px);
+  background-size: 6px 6px;
+}
+.value-pattern-4 {
+  background-image: linear-gradient(135deg, oklch(0.6 0.1 320 / 0.15) 25%, transparent 25%);
+  background-size: 8px 8px;
+}
+.value-pattern-5 {
+  background-image: repeating-linear-gradient(
+    90deg,
+    oklch(0.6 0.12 45 / 0.15),
+    oklch(0.6 0.12 45 / 0.15) 2px,
+    transparent 2px,
+    transparent 6px
+  );
+}
+
+@keyframes pulse-place {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.65 0.14 85 / 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 4px oklch(0.65 0.14 85 / 0.2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-safe\:animate-\[pulse-place_1\.2s_ease-in-out_infinite\] {
+    animation: none !important;
+  }
+  .motion-safe\:animate-\[place_0\.25s_ease-out\] {
+    animation: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html.reduce-motion .motion-safe\:animate-\[place_0\.25s_ease-out\] {
+  animation: none !important;
+}
+
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Focus — visible keyboard path */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent-rows);
+  outline-offset: 2px;
+}
+
+/* Home — subtle board grid motif */
+.home-grid-bg {
+  background-image:
+    linear-gradient(var(--color-border-subtle) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-border-subtle) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: center;
+  background-color: var(--color-bg-page);
+  mask-image: linear-gradient(to bottom, black 0%, black 70%, transparent 100%);
+}
+
+/* Driver.js — light popover (Phase D) */
+.driver-popover.numchess-driver {
+  background: var(--color-surface-1) !important;
+  color: var(--color-text-primary) !important;
+  border: 1px solid var(--color-border-subtle) !important;
+  border-radius: 1rem !important;
+  box-shadow: var(--shadow-panel) !important;
+}
+
+.driver-popover.numchess-driver .driver-popover-title {
+  font-family: var(--font-display) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.driver-popover.numchess-driver .driver-popover-description {
+  color: var(--color-text-muted) !important;
+}
+
+.driver-popover.numchess-driver button {
+  background: var(--color-accent-action) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  text-shadow: none !important;
+}
+
+.driver-popover.numchess-driver .driver-popover-navigation-btns {
+  justify-content: flex-end !important;
+}

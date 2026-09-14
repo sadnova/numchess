@@ -1,0 +1,15 @@
+import { test, expect } from "@playwright/test";
+
+test("app loads and shows board", async ({ page }) => {
+  await page.goto("/play");
+  await expect(page.getByTestId("app-shell")).toBeVisible();
+  await expect(page.getByTestId("cell-0")).toBeVisible();
+  await expect(page.getByTestId("inventory-p1")).toBeVisible();
+});
+
+test("home links to play", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByTestId("home-page")).toBeVisible();
+  await page.getByTestId("play-link").click();
+  await expect(page.getByTestId("app-shell")).toBeVisible();
+});

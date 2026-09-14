@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Numchess</title>
+  
+  <style>
+		
+		
+	table, th, td {
+  border: 20px solid white;
+}
+
+
+
+		</style>
+		
+</head>
+<body>
+
+  <h1> Numchess ultimate </h1>
+  
+  <h3 id="not"> </h3>
+  
+  <section>
+  <table >
+  
+  <tbody>
+  <tr >
+  <td style="min-width:100px"><div id="k1"><button id="ki1" >Here</button></div></td>
+  <td style="min-width:100px"><div id="k2"><button id="ki2">Here</button></div></td>
+  <td style="min-width:100px"><div id="k3"><button id="ki3">Here</button></div></td>
+  <td style="min-width:100px"><div id="k4"><button id="ki4">Here</button></div></td>
+  <td style="min-width:100px"><div id="k5"><button id="ki5" >Here</button></div></td>
+  <td style="min-width:100px"><div id="k6"><button id="ki6">Here</button></div></td>
+  </tr>
+ 
+  <tr>
+  
+  <td><div id="k7"><button id="ki7">Here</button></div></td>
+  <td><div id="k8"><button id="ki8">Here</button></div></td>
+  <td><div id="k9"><button id="ki9" >Here</button></div></td>
+  <td><div id="k10"><button id="ki10">Here</button></div></td>
+  <td><div id="k11"><button id="ki11">Here</button></div></td>
+  <td><div id="k12"><button id="ki12">Here</button></div></td>
+  </tr>
+  
+  <tr>
+  <td><div id="k13"><button id="ki13" >Here</button></div></td>
+  <td><div id="k14"><button id="ki14">Here</button></div></td>
+  <td><div id="k15"><button id="ki15">Here</button></div></td>
+  <td><div id="k16"><button id="ki16">Here</button></div></td>
+  <td><div id="k17"><button id="ki17">Here</button></div></td>
+  <td><div id="k18"><button id="ki18">Here</button></div></td>
+  </tr>
+  
+  <tr>
+  <td><div id="k19"><button id="ki19" >Here</button></div></td>
+  <td><div id="k20"><button id="ki20">Here</button></div></td>
+  <td><div id="k21"><button id="ki21">Here</button></div></td>
+  <td><div id="k22"><button id="ki22">Here</button></div></td>
+  <td><div id="k23"><button id="ki23">Here</button></div></td>
+  <td><div id="k24"><button id="ki24">Here</button></div></td>
+  </tr>
+  
+  <tr>
+  <td><div id="k25"><button id="ki25" >Here</button></div></td>
+  <td><div id="k26"><button id="ki26">Here</button></div></td>
+  <td><div id="k27"><button id="ki27">Here</button></div></td>
+  <td><div id="k28"><button id="ki28">Here</button></div></td>
+  <td><div id="k29"><button id="ki29">Here</button></div></td>
+  <td><div id="k30"><button id="ki30">Here</button></div></td>
+  </tr>
+  
+  <tr>
+  <td><div id="k31"><button id="ki31" >Here</button></div></td>
+  <td><div id="k32"><button id="ki32">Here</button></div></td>
+  <td><div id="k33"><button id="ki33">Here</button></div></td>
+  <td><div id="k34"><button id="ki34">Here</button></div></td>
+  <td><div id="k35"><button id="ki35">Here</button></div></td>
+  <td><div id="k36"><button id="ki36">Here</button></div></td>
+  </tr>
+  
+  </tbody>
+  
+  </table>
+  
+  <div id="pc">
+  <h2 id="pd">Player 1 choose a pawn</h2>
+
+   <button id="p1" >&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="p2" >&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="p3" >&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="p4" >&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="p6" >&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="p7" >&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="p8" >&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="p9" >&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="p11" >&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <br><br>
+   <button id="p12" >&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="p13" >&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="p14" >&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="p15" >&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="p16" >&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="p17" >&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="p18" >&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="p5" >&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="p10" >&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;</button>
+  </div>
+  
+  <div id="qc">
+  <h2 id="qd">Player 2 choose a pawn</h2>
+
+   <button id="q1" >&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="q2" >&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="q3" >&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="q4" >&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="q6" >&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="q7" >&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="q8" >&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="q9" >&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="q11" >&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <br><br>
+   <button id="q12" >&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="q13" >&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="q14" >&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="q15" >&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="q16" >&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="q17" >&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="q18" >&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="q5" >&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <button id="q10" >&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;</button>
+  </div>
+  
+  <h2 id="kg"></h2>
+  
+  </section>
+  
+  
+  <script>
+     window.pd=2;
+	 var d=0;
+	 var a=[];
+	 var cho="";
+	 var dlt;
+     for ( var i = 1; i < 37; i++ ) (function(i){ 
+	        
+		   document.getElementById("ki"+i).onclick = function() {
+                 		   
+		       document.getElementById("k"+i).innerHTML=cho;
+			   document.getElementById(dlt).remove();
+			   caz(1);
+			   cgh();
+			   
+		   }
+		   
+		   if(i<19){
+		     document.getElementById("p"+i).onclick = function() {
+               cho=document.getElementById("p"+i).innerHTML.replaceAll("&nbsp;",""); 
+               dlt="p"+i;
+			   document.getElementById("pd").innerHTML="you choose "+cho+" ";
+               caz(0);			   
+		       
+			  
+		     }
+			 document.getElementById("q"+i).onclick = function() {
+               		   
+		       cho=document.getElementById("q"+i).innerHTML.replaceAll("&nbsp;",""); 
+               dlt="q"+i;
+			   document.getElementById("qd").innerHTML="you choose "+cho+" ";
+               caz(0);
+			  
+		     }
+		   }
+
+	 })(i)
+	 
+	     function caz(a){
+		     const buttons = document.getElementsByTagName("button");
+                 for (const button of buttons) {
+				   if(a==1){
+				     if(button.innerHTML=="Here"){
+                       button.disabled = true;
+				     }
+				   }
+				   else{
+				    if(button.innerHTML=="Here"){
+                      button.disabled = false;
+				    }
+				   }
+                 }
+		 }
+	 caz(1);
+	     function cgh(){
+		     var vv=0;
+	 	     for(var i=1;i<37;i++){
+		     if(!document.getElementById("k"+i).innerHTML.includes("button")){
+		     a[i-1]=document.getElementById("k"+i).innerHTML-0;
+			 
+			 }
+			 else{
+			   vv++;
+			 }
+		 }
+		 if(a=="lpopol"){
+		    document.getElementById("not").innerHTML="<b><font color='blue'>Game is complete, Player "+plr()+" wins this game</font></b>";
+			var inputs = document.getElementsByTagName("button");
+             for (var i = 0; i < inputs.length; i++) {
+                     inputs[i].disabled = true; 
+             }
+		 }
+		 else{
+		  window.pd++;
+		  if(vv>0){
+		  if(plr()=="one"){
+		      document.getElementById("qc").style.display = 'none';           // Hide
+              document.getElementById("pc").style.display = 'block';
+              document.getElementById("pd").innerHTML=	' Player 1 choose a pawn';		  
+		  }
+		  else{
+		      document.getElementById("pc").style.display = 'none';           // Hide
+              document.getElementById("qc").style.display = 'block';
+			   document.getElementById("qd").innerHTML=	' Player 2 choose a pawn';	
+		  }
+		 document.getElementById("not").innerHTML="It is player "+plr()+"'s turn";
+		 }
+		 else{
+		    document.getElementById("pc").style.display = 'none';           // Hide
+              document.getElementById("qc").style.display = 'none';
+		   chk(a);
+		 }
+		 //if(d==1){ draw(); }
+		 }
+		 
+		 }
+		 
+		 
+		document.getElementById("qc").style.display = 'none';           // Hide
+              document.getElementById("pc").style.display = 'block'; 
+	 
+	 function plr(){
+	    
+	     if(isEven(window.pd)){
+		   return "one"
+		 }
+		 else {
+		   return "two"
+		 }
+	 }
+	 
+	 function isEven(n) {
+       return n % 2 == 0;
+    }
+	 function chk(a){
+	       var n=36;
+		   var pk=0;
+		   var hor=[];
+		   var vir=[];
+		   for(var i=0;i<36;i++){
+		         a[i]=a[i]-0;
+		   }
+		   for (var j=0;j<6;j++){
+			  var pkh=j*6;
+			  var hors=[a[pkh],a[pkh+1],a[pkh+2],a[pkh+3],a[pkh+4],a[pkh+5]];
+			  var virs=[a[j],a[j+6],a[j+12],a[j+18],a[j+24],a[j+30]];
+			  var counth = {};
+			  var countv = {};
+              hors.forEach(function(i) { counth[i] = (counth[i]||0) + 1;});
+              virs.forEach(function(i) { countv[i] = (countv[i]||0) + 1;});
+			  counth[9]=remove_duplicates(hors).length;
+			  countv[9]=remove_duplicates(virs).length;
+			  
+			  hor.push(counth);
+			  vir.push(countv);
+		   }
+		   
+		   var dgh=[a[0],a[7],a[14],a[21],a[28],a[35]];
+		   var dgv=[a[5],a[10],a[15],a[20],a[25],a[30]];
+		   var counth = {};
+			  var countv = {};
+              dgh.forEach(function(i) { counth[i] = (counth[i]||0) + 1;});
+              dgv.forEach(function(i) { countv[i] = (countv[i]||0) + 1;});
+			  counth[9]=remove_duplicates(dgh).length;
+			  countv[9]=remove_duplicates(dgv).length;
+			  
+			  hor.push(counth);
+			  vir.push(countv);
+		   
+		   console.log(hor);
+		   console.log(vir);
+		  var hort=[];
+		  var virt=[];
+		  for(var k=0;k<7;k++){
+		  var yp=hor[k];
+		  var vp=vir[k];
+		  
+		  
+	      hor[k].values = function (obj) {
+    var vals = [];
+    for( var key in obj ) {
+        if ( obj.hasOwnProperty(key) ) {
+            vals.push(obj[key]);
+        }
+    }
+    return vals;
+};
+
+vir[k].values = function (obj) {
+    var vals = [];
+    for( var key in obj ) {
+        if ( obj.hasOwnProperty(key) ) {
+            vals.push(obj[key]);
+        }
+    }
+    return vals;
+};                
+          var top=hor[k].values(yp);
+		  top.pop();
+		  hort.push(...top);
+		  
+		  var dop=vir[k].values(vp);
+		  dop.pop();
+		  virt.push(...dop);
+	 }
+	 console.log(hor);
+	 console.log(virt);
+	 var finalh = {};
+	 var finalv = {};
+	 hort.forEach(function(i) { finalh[i] = (finalh[i]||0) + 1;});
+	 virt.forEach(function(i) { finalv[i] = (finalv[i]||0) + 1;});
+	 console.log(finalh);
+	 console.log(finalv);
+	 
+	 document.getElementById("kg").innerHTML=results(finalh,finalv);
+}
+
+
+function remove_duplicates(arr) {
+    var obj = {};
+    var ret_arr = [];
+    for (var i = 0; i < arr.length; i++) {
+        obj[arr[i]] = true;
+    }
+    for (var key in obj) {
+        ret_arr.push(key);
+    }
+    return ret_arr;
+}
+
+
+function results(a,b){
+    var restxt="";
+	var vm,hm,lv;
+    for(var i=0;i<6;i++){
+	  var v,h;
+	  var num=i+1;
+	  if(a.hasOwnProperty(num)){
+	     h=a[num];
+	  }
+	  else{
+	     h=0;
+	  }
+	  if(b.hasOwnProperty(num)){
+	     v=b[num];
+	  }
+	  else{
+	     v=0;
+	  }
+	  var tr="";
+	  if(h>v){
+	     tr="player 1 won";
+	  }
+	  else if(v>h){
+	     tr="player 2 won";
+	  }
+	  else if(v==h){
+	     tr="its a draw";
+	  }
+	  if(num>1){
+	     if(v==h && h==0){}
+		 else{
+		  if(v!=h){
+	      vm=v; hm=h; lv=num;
+		  }
+	     restxt+="Level "+num+" result, "+tr+" , "+h+" - "+v+" <br><br>";
+		 }
+	  }
+	 
+	}
+	      if(lv==5){
+	      document.getElementById("not").innerHTML="<font color='red'>FATALITY</font><br>";
+		  }
+		  if(lv==4){
+	      document.getElementById("not").innerHTML="<font color='orange'>DEMOLITION</font><br>";
+		  }
+	if(hm>vm){
+	      document.getElementById("not").innerHTML+="Game is complete, The Level "+lv+" winner is <b><font color='blue'> player 1</font></b> with a score of <b><font color='blue'>"+hm+" - "+vm+"</font></b>";
+	  }
+	  else if(vm>hm){
+	      document.getElementById("not").innerHTML+="Game is complete, The Level "+lv+" winner is <b><font color='blue'> player 2</font></b> with a score of <b><font color='blue'>"+hm+" - "+vm+"</font></b>";
+	  }
+	return restxt;
+}
+	 
+	 function getOccurrence(array, value) {
+    var count = 0;
+    array.forEach((v) => (v === value && count++));
+    return count;
+      }
+	 
+	 function draw(){
+	      document.getElementById("not").innerHTML="Game is over, No winner here move on";
+	 }
+	
+  </script>
+</body>
+</html>

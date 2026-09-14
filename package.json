@@ -1,0 +1,29 @@
+{
+  "name": "numchess",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "turbo run dev --filter=@numchess/web",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "sim:random": "tsx scripts/sim-random.ts --games 500 --seed 42",
+    "sim:bot": "tsx scripts/sim-bot-vs-random.ts --games 50 --seed 42 --bot-ms 80",
+    "audio:placeholder": "node scripts/generate-placeholder-audio.mjs",
+    "test:e2e": "playwright test",
+    "a11y:lighthouse": "node scripts/lighthouse-a11y.mjs",
+    "a11y": "pnpm build && pnpm a11y:lighthouse"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@playwright/test": "^1.50.0",
+    "tsx": "^4.19.2",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "@numchess/engine": "workspace:*"
+  }
+}
