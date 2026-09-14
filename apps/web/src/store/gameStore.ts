@@ -1,10 +1,12 @@
 import { create } from "zustand";
 import {
   applyAction,
+  applyCompoundMove,
   cancelSelection,
   createInitialState,
   createInitialStateWithFirstPlayer,
   getLegalActions,
+  type CompoundMove,
   type GameAction,
   type GameState,
   type TileValue,
@@ -31,6 +33,7 @@ interface GameStore {
   undo: () => void;
   newGame: (options?: { firstPlayer?: 1 | 2; initialState?: GameState }) => void;
   loadState: (state: GameState) => void;
+  applyBotCompoundMove: (move: CompoundMove) => boolean;
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -95,6 +98,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
       undoStack: [],
       selectedTile: state.phase.kind === "place" ? state.phase.selected : null,
     }),
+
+  applyBotCompoundMove: (move) => {
+    const prev = get().state;
+    if (prev.phase.kind === "ended") return false;
+    const next = applyCompoundMove(prev, move);
+    if (!next) return false;
+    set({
+      state: next,
+      undoStack: [...get().undoStack.slice(-MAX_UNDO), prev],
+      selectedTile: null,
+    });
+    return true;
+  },
 }));
 
 useGameStore.subscribe((s) => {

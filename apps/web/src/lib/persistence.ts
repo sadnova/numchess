@@ -1,4 +1,8 @@
-import type { GameState } from "@numchess/engine";
+import {
+  searchOptionsForDifficulty,
+  type GameState,
+  type SearchOptions,
+} from "@numchess/engine";
 
 const RESUME_KEY = "numchess-resume";
 const SETTINGS_KEY = "numchess-settings";
@@ -53,14 +57,11 @@ const DEFAULT_SETTINGS: AppSettings = {
 };
 
 export function botTimeMs(difficulty: BotDifficulty): number {
-  switch (difficulty) {
-    case "easy":
-      return 200;
-    case "hard":
-      return 2000;
-    default:
-      return 800;
-  }
+  return botSearchOptions(difficulty).timeMs ?? 800;
+}
+
+export function botSearchOptions(difficulty: BotDifficulty): SearchOptions {
+  return searchOptionsForDifficulty(difficulty);
 }
 
 export function loadSettings(): AppSettings {

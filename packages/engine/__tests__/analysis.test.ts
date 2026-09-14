@@ -48,7 +48,7 @@ describe("classifyLineBand ghost threat", () => {
 describe("analyzePositionForPlayer", () => {
   it("returns 8 insights", () => {
     const insights = analyzePositionForPlayer(createInitialState(), 1);
-    expect(insights).toHaveLength(8);
+    expect(insights).toHaveLength(7);
   });
 
   it("marks a nearly complete line as critical when tile exists", () => {

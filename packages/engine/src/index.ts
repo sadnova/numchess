@@ -19,7 +19,7 @@ export {
   combinedInventoryCounts,
 } from "./analysis.js";
 export type { LineInsight, ThreatBand } from "./analysis.js";
-export { getLineCells, getScoringLines, indexToRowCol, rowColToIndex } from "./lines.js";
+export { getFilledLineCells, getLineCells, getScoringLines, indexToRowCol, rowColToIndex } from "./lines.js";
 export {
   addContributions,
   analyzeLine,
@@ -31,10 +31,13 @@ export {
   evaluateGame,
   isBoardFull,
   isLineComplete,
+  lineScoreDelta,
   linesNewlyCompleted,
   liveScoreLeader,
   scoreBoth,
   scoreCompletedLines,
+  scoreLinesFromBoard,
+  scoreLiveLevels,
   scorePlayer,
   scorePerspective,
 } from "./scoring.js";
@@ -71,10 +74,15 @@ export {
 } from "./fixtures.js";
 export {
   applyCompoundMove,
+  contributionDeltaScore,
+  evalInsightTerms,
+  evalLiveLevelDiff,
   evaluatePosition,
   getLegalCompoundMoves,
+  chooseBotMove,
   pickSearchMove,
   searchBestMove,
+  searchOptionsForDifficulty,
   type CompoundMove,
   type SearchOptions,
 } from "./ai.js";

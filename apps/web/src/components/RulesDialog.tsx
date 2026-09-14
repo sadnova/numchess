@@ -25,12 +25,16 @@ export function RulesDialog({
         >
             <li>6×6 shared board; 36 placements total.</li>
             <li>
-              P1 scores each row and both main diagonals; P2 scores each column
-              and both diagonals.
+              P1 (Rows) scores each row and the ↘ diagonal; P2 (Cols) scores
+              each column and the ↙ diagonal.
             </li>
             <li>
-              Each full line awards repetition (R) and diversity (D) levels when
-              thresholds are met (coexist on the same line).
+              Live score counts pattern levels on partial lines (filled cells
+              only); end-of-game uses full lines on the same sets.
+            </li>
+            <li>
+              Each line awards repetition (R) and diversity (D) levels when
+              thresholds are met (both can apply on the same line).
             </li>
             <li>
               Winner: compare L5, then L4, L3, L2 counts (rows vs columns). Full

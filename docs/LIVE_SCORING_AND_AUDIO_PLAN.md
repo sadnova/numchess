@@ -23,6 +23,8 @@ Show **official level buckets (L5→L2)** for Rows (P1) and Columns (P2) **as th
 
 **Principle:** A scoring line contributes only when **all six cells on that line are filled**. Those contributions are **final for that line** (same R/D rules as endgame). Incomplete lines stay out of the live totals; partial R/D remains in **Line insights** (heuristic).
 
+> **Superseded for live HUD policy:** See [SPLIT_DIAGONALS_AND_LIVE_SCORING_V2_PLAN.md](./SPLIT_DIAGONALS_AND_LIVE_SCORING_V2_PLAN.md) — dynamic live totals (partial lines) + split diagonals (`rulesVersion` **1.1.0**).
+
 When `ply === 36`, live totals **must equal** `evaluateGame(state).levels` (regression test).
 
 ### 1.2 Game audio

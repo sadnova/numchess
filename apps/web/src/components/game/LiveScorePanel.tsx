@@ -17,12 +17,12 @@ export function LiveScorePanel({
   return (
     <section
       className="w-full max-w-md rounded-xl border border-border-subtle bg-surface-2/50 px-3 py-2"
-      aria-label="Live score from completed lines"
+      aria-label="Live score from filled lines"
       data-testid="live-score-panel"
     >
       <div className="flex items-baseline justify-between gap-2 mb-1">
         <p className="text-xs font-medium text-text-primary">Live score</p>
-        <p className="text-[10px] text-text-muted">Completed lines only</p>
+        <p className="text-[10px] text-text-muted">Updates each turn</p>
       </div>
       <div className="grid grid-cols-[1fr_auto_1fr] gap-x-2 text-[10px] uppercase tracking-wide text-text-muted mb-1">
         <span className="text-accent-rows text-right">Rows</span>

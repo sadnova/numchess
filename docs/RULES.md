@@ -1,4 +1,4 @@
-# Numchess Classic — Rules (rulesVersion 1.0.0)
+# Numchess Classic — Rules (rulesVersion 1.1.0)
 
 ## Setup
 
@@ -15,10 +15,14 @@
 
 | Player | Lines |
 |--------|--------|
-| **Player 1** | 6 rows + both main diagonals (8 lines) |
-| **Player 2** | 6 columns + both main diagonals (8 lines) |
+| **Player 1 (Rows)** | 6 rows + main diagonal ↘ (7 lines) |
+| **Player 2 (Cols)** | 6 columns + main diagonal ↙ (7 lines) |
 
-## Pattern on a full line (6 cells)
+## Pattern on a line
+
+For **live** scoring during play, use only **filled** cells on that line (partial lines count). At **game end**, each line must be full (6 cells) before it is scored officially—the same R/D rules apply to the filled segment during play and to the full line at end.
+
+For a line segment (partial or full):
 
 - **R** = max count of any single value (cap 5).
 - **D** = number of distinct values 1–5 (cap 5).
@@ -38,4 +42,5 @@ Player 1 uses **row** totals; Player 2 uses **column** totals.
 
 ## Changelog
 
+- **1.1.0** — Split diagonals (↘ → Rows, ↙ → Cols); live scoring from partial filled lines.
 - **1.0.0** — Shared diagonals for both players; coexistence (R,D) scoring (replaces prototype scorer).

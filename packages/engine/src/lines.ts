@@ -1,5 +1,5 @@
 import { BOARD_SIZE, CELL_COUNT, type TileValue } from "./constants.js";
-import type { Perspective } from "./types.js";
+import type { CellValue, Perspective } from "./types.js";
 
 export type { Perspective };
 
@@ -21,6 +21,14 @@ function colIndices(c: number): number[] {
 const DIAG_SE = [0, 7, 14, 21, 28, 35];
 const DIAG_SW = [5, 10, 15, 20, 25, 30];
 
+/** Filled tile values along line indices, in index order (partial lines OK). */
+export function getFilledLineCells(
+  board: CellValue[],
+  indices: number[],
+): TileValue[] {
+  return getLineCells(board, indices);
+}
+
 export function getScoringLines(perspective: Perspective): ScoringLine[] {
   const lines: ScoringLine[] = [];
   if (perspective === "rows") {
@@ -31,6 +39,11 @@ export function getScoringLines(perspective: Perspective): ScoringLine[] {
         indices: rowIndices(r),
       });
     }
+    lines.push({
+      id: "diag-se",
+      label: "Diagonal ↘",
+      indices: [...DIAG_SE],
+    });
   } else {
     for (let c = 0; c < BOARD_SIZE; c++) {
       lines.push({
@@ -39,17 +52,12 @@ export function getScoringLines(perspective: Perspective): ScoringLine[] {
         indices: colIndices(c),
       });
     }
+    lines.push({
+      id: "diag-sw",
+      label: "Diagonal ↙",
+      indices: [...DIAG_SW],
+    });
   }
-  lines.push({
-    id: "diag-se",
-    label: "Diagonal ↘",
-    indices: [...DIAG_SE],
-  });
-  lines.push({
-    id: "diag-sw",
-    label: "Diagonal ↙",
-    indices: [...DIAG_SW],
-  });
   return lines;
 }
 

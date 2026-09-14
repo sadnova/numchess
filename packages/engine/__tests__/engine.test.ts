@@ -29,9 +29,9 @@ describe("analyzeLine", () => {
 });
 
 describe("getScoringLines", () => {
-  it("returns 8 lines per perspective", () => {
-    expect(getScoringLines("rows")).toHaveLength(8);
-    expect(getScoringLines("columns")).toHaveLength(8);
+  it("returns 7 lines per perspective (6 orthogonals + one diagonal)", () => {
+    expect(getScoringLines("rows")).toHaveLength(7);
+    expect(getScoringLines("columns")).toHaveLength(7);
   });
 });
 

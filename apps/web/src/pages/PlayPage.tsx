@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   createSandboxState,
-  linesNewlyCompleted,
+  lineScoreDelta,
   type TileValue,
 } from "@numchess/engine";
 import type { ReplayFile } from "@numchess/replay";
@@ -29,6 +29,7 @@ import { usePlayTutorial } from "../hooks/usePlayTutorial";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { findLineIndices, lineCategory } from "../lib/lines";
 import { entriesFromLineDelta, type ScoreFeedEntry } from "../lib/scoreFeed";
+import { canHumanAct } from "../lib/playVsBot";
 import {
   isSandboxMode,
   loadSettings,
@@ -55,7 +56,7 @@ export function PlayPage() {
   const [settings, setSettings] = useState<AppSettings>(() => loadSettings());
   const effectiveMode: GameMode =
     isSandboxMode() ? "sandbox" : settings.gameMode;
-  useBotPlayer(effectiveMode, settings.botDifficulty, settings.humanSeat);
+  const isVsBot = effectiveMode === "vsBot";
   const reducedMotion = useReducedMotion(settings.reduceMotion);
   usePlayTutorial(
     settings.showTutorialOnPlay &&
@@ -64,7 +65,6 @@ export function PlayPage() {
   );
   const sounds = useGameAudio(settings);
   const gridRef = useRef<HTMLDivElement>(null);
-  useBoardKeyboard(gridRef);
   const fileRef = useRef<HTMLInputElement>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [importToast, setImportToast] = useState<string | null>(null);
@@ -98,7 +98,22 @@ export function PlayPage() {
   const heldTile = phase.kind === "place" ? phase.selected : null;
   const placing = phase.kind === "place";
 
+  const { botThinking } = useBotPlayer(
+    effectiveMode,
+    settings.botDifficulty,
+    settings.humanSeat,
+  );
+  const humanCanAct = canHumanAct({
+    isVsBot,
+    humanSeat: settings.humanSeat,
+    activePlayer,
+    botThinking,
+  });
+
+  useBoardKeyboard(gridRef, humanCanAct && placing);
+
   const handleInventorySelect = (v: TileValue) => {
+    if (!humanCanAct) return;
     sounds.playSelect();
     if (placing && activePlayer !== null) {
       if (heldTile === v) return;
@@ -112,10 +127,10 @@ export function PlayPage() {
       setScoreFeed([]);
       sounds.resetLineDebouncers();
     } else if (state.ply > prevPlyRef.current) {
-      const delta = linesNewlyCompleted(prevBoardRef.current, state.board);
+      const delta = lineScoreDelta(prevBoardRef.current, state.board);
       const newEntries = entriesFromLineDelta(delta);
       if (newEntries.length > 0) {
-        setScoreFeed((f) => [...newEntries, ...f].slice(0, 5));
+        setScoreFeed((f) => [...newEntries, ...f].slice(0, 12));
         sounds.playLineLockFanfare(delta);
         if (!settings.reduceMotion) {
           const lv = newEntries
@@ -236,11 +251,12 @@ export function PlayPage() {
   const inventoryProps = (player: 1 | 2) => ({
     player,
     state,
-    isTurn: activePlayer === player,
-    selecting: selecting && activePlayer === player,
-    heldTile: activePlayer === player ? heldTile : null,
+    isTurn: activePlayer === player && humanCanAct,
+    selecting: selecting && activePlayer === player && humanCanAct,
+    heldTile: activePlayer === player && humanCanAct ? heldTile : null,
     onSelect: handleInventorySelect,
-    canSelect: (v: TileValue) => canSelectTile(state, v),
+    canSelect: (v: TileValue) =>
+      humanCanAct && canSelectTile(state, v),
   });
 
   return (
@@ -302,6 +318,9 @@ export function PlayPage() {
               arenaClockEnabled={settings.arenaClockEnabled}
               arenaMoveLimitSec={settings.arenaMoveLimitSec}
               onCancelSelect={cancelSelect}
+              isVsBot={isVsBot}
+              humanSeat={settings.humanSeat}
+              botThinking={botThinking}
             />
             <LiveScorePanel
               levels={live.levels}
@@ -322,14 +341,15 @@ export function PlayPage() {
             highlightIndices={highlightIndices}
             reduceMotion={reducedMotion}
             onPlace={(index) => {
+              if (!humanCanAct) return;
               sounds.playPlace();
               placeAt(index);
             }}
+            interactionDisabled={!humanCanAct}
           />
         }
         belowBoard={
           <>
-            <ScoreFeed entries={scoreFeed} />
             <LineInsightsPanel
               insights={insights}
               overlaySettings={{
@@ -356,7 +376,9 @@ export function PlayPage() {
           </>
         }
         footer={
-          <GameFooter
+          <div className="w-full max-w-lg mx-auto space-y-3">
+            <ScoreFeed entries={scoreFeed} />
+            <GameFooter
             phase={phase}
             fileInputRef={fileRef}
             importError={importError}
@@ -372,6 +394,7 @@ export function PlayPage() {
             onImportClick={() => fileRef.current?.click()}
             onImportFile={onImportFile}
           />
+          </div>
         }
       />
       <SettingsSheet

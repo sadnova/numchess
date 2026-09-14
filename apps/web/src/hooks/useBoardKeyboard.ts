@@ -6,13 +6,16 @@ function indexFromRowCol(row: number, col: number): number {
   return row * BOARD_SIZE + col;
 }
 
-export function useBoardKeyboard(gridRef: RefObject<HTMLDivElement | null>) {
+export function useBoardKeyboard(
+  gridRef: RefObject<HTMLDivElement | null>,
+  enabled = true,
+) {
   const phase = useGameStore((s) => s.state.phase);
   const focusRef = useRef(0);
 
   useEffect(() => {
     const grid = gridRef.current;
-    if (!grid || phase.kind !== "place") return;
+    if (!enabled || !grid || phase.kind !== "place") return;
 
     const places = legalPlaceIndices(useGameStore.getState().state);
     if (places.length === 0) return;
@@ -65,5 +68,5 @@ export function useBoardKeyboard(gridRef: RefObject<HTMLDivElement | null>) {
 
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [gridRef, phase.kind]);
+  }, [gridRef, phase.kind, enabled]);
 }

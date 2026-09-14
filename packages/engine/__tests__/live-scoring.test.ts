@@ -6,9 +6,11 @@ import {
   getLegalActions,
   getScoringLines,
   isLineComplete,
+  lineScoreDelta,
   linesNewlyCompleted,
   liveScoreLeader,
   scoreCompletedLines,
+  scoreLiveLevels,
 } from "../src/index.js";
 
 describe("isLineComplete", () => {
@@ -24,6 +26,33 @@ describe("isLineComplete", () => {
     const row0 = getScoringLines("rows")[0]!.indices;
     for (let i = 0; i < 6; i++) board[row0[i]!] = i + 1;
     expect(isLineComplete(board, row0)).toBe(true);
+  });
+});
+
+describe("scoreLiveLevels", () => {
+  it("empty board has zero levels", () => {
+    const s = createInitialState();
+    const live = scoreLiveLevels(s);
+    expect(live.rows).toEqual({ 2: 0, 3: 0, 4: 0, 5: 0 });
+    expect(live.columns).toEqual({ 2: 0, 3: 0, 4: 0, 5: 0 });
+  });
+
+  it("matches evaluateGame when board full", () => {
+    let s = createInitialState();
+    let safety = 0;
+    while (s.phase.kind !== "ended" && safety++ < 200) {
+      const actions = getLegalActions(s);
+      const a = actions[0]!;
+      if (a.type === "SELECT") {
+        s = applyAction(s, { type: "SELECT", value: a.value }).value!;
+      } else {
+        s = applyAction(s, { type: "PLACE", index: a.index }).value!;
+      }
+    }
+    expect(s.phase.kind).toBe("ended");
+    const live = scoreLiveLevels(s);
+    const official = evaluateGame(s);
+    expect(live).toEqual(official.levels);
   });
 });
 
@@ -67,7 +96,7 @@ describe("linesNewlyCompleted", () => {
     expect(delta.player2).toHaveLength(0);
   });
 
-  it("scores diagonal for both players when diag completes", () => {
+  it("↘ completion scores only for rows perspective", () => {
     const prev = Array(36).fill(null) as (number | null)[];
     const diag = getScoringLines("rows").find((l) => l.id === "diag-se")!.indices;
     for (let i = 0; i < 5; i++) prev[diag[i]!] = 1;
@@ -75,7 +104,22 @@ describe("linesNewlyCompleted", () => {
     next[diag[5]!] = 2;
     const delta = linesNewlyCompleted(prev, next);
     expect(delta.player1.some((e) => e.id === "diag-se")).toBe(true);
-    expect(delta.player2.some((e) => e.id === "diag-se")).toBe(true);
+    expect(delta.player2.some((e) => e.id === "diag-se")).toBe(false);
+  });
+});
+
+describe("lineScoreDelta", () => {
+  it("detects L5 diversity when fifth distinct value placed on row", () => {
+    const prev = Array(36).fill(null) as (number | null)[];
+    const row0 = getScoringLines("rows")[0]!.indices;
+    for (let i = 0; i < 4; i++) prev[row0[i]!] = (i + 1) as 1 | 2 | 3 | 4;
+    const next = [...prev];
+    next[row0[4]!] = 5;
+    const delta = lineScoreDelta(prev, next);
+    expect(delta.player1).toHaveLength(1);
+    expect(delta.player1[0]!.analysis.contributions.some((c) => c.level === 5)).toBe(
+      true,
+    );
   });
 });
 

@@ -1,11 +1,12 @@
 import { CELL_COUNT } from "./constants.js";
-import { getLineCells, getScoringLines } from "./lines.js";
+import { getFilledLineCells, getLineCells, getScoringLines } from "./lines.js";
 import { addContributions, analyzeLine, emptyLevelCounts } from "./patterns.js";
 import type {
   CellValue,
   GameState,
   LevelCounts,
   LevelCountsPair,
+  LineContribution,
   LineLedgerEntry,
   Perspective,
   PlayerId,
@@ -103,6 +104,77 @@ export function liveScoreLeader(levels: LevelCountsPair): {
     levels.columns,
   );
   return { leader: winner, decisiveLevel };
+}
+
+function contributionKey(contributions: LineContribution[]): string {
+  return contributions
+    .map((c) => `${c.level}-${c.kind}`)
+    .sort()
+    .join("|");
+}
+
+export function scoreLinesFromBoard(
+  board: CellValue[],
+  perspective: Perspective,
+): { counts: LevelCounts; ledger: LineLedgerEntry[] } {
+  const counts = emptyLevelCounts();
+  const ledger: LineLedgerEntry[] = [];
+  for (const line of getScoringLines(perspective)) {
+    const cells = getFilledLineCells(board, line.indices);
+    if (cells.length === 0) continue;
+    const analysis = analyzeLine(cells);
+    addContributions(counts, analysis.contributions);
+    ledger.push({
+      id: line.id,
+      label: line.label,
+      indices: line.indices,
+      analysis,
+    });
+  }
+  return { counts, ledger };
+}
+
+export function scoreLiveLevels(state: GameState): LevelCountsPair {
+  const rows = scoreLinesFromBoard(state.board, "rows");
+  const columns = scoreLinesFromBoard(state.board, "columns");
+  return { rows: rows.counts, columns: columns.counts };
+}
+
+function ledgerMap(
+  board: CellValue[],
+  perspective: Perspective,
+): Map<string, LineLedgerEntry> {
+  const { ledger } = scoreLinesFromBoard(board, perspective);
+  return new Map(ledger.map((e) => [e.id, e]));
+}
+
+function deltaForPerspective(
+  prevBoard: CellValue[],
+  nextBoard: CellValue[],
+  perspective: Perspective,
+): LineLedgerEntry[] {
+  const prev = ledgerMap(prevBoard, perspective);
+  const next = ledgerMap(nextBoard, perspective);
+  const entries: LineLedgerEntry[] = [];
+  for (const [id, nextEntry] of next) {
+    const prevKey = contributionKey(prev.get(id)?.analysis.contributions ?? []);
+    const nextKey = contributionKey(nextEntry.analysis.contributions);
+    if (nextKey !== prevKey && nextKey.length > 0) {
+      entries.push(nextEntry);
+    }
+  }
+  return entries;
+}
+
+/** Lines whose R/D contributions changed between boards (partial or complete). */
+export function lineScoreDelta(
+  prevBoard: CellValue[],
+  nextBoard: CellValue[],
+): { player1: LineLedgerEntry[]; player2: LineLedgerEntry[] } {
+  return {
+    player1: deltaForPerspective(prevBoard, nextBoard, "rows"),
+    player2: deltaForPerspective(prevBoard, nextBoard, "columns"),
+  };
 }
 
 function perspectiveForPlayer(player: PlayerId): Perspective {

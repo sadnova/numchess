@@ -17,6 +17,7 @@ export type BoardProps = {
   highlightIndices?: number[];
   onPlace: (index: number) => void;
   reduceMotion?: boolean;
+  interactionDisabled?: boolean;
 };
 
 export const Board = forwardRef<HTMLDivElement, BoardProps>(function Board(
@@ -29,6 +30,7 @@ export const Board = forwardRef<HTMLDivElement, BoardProps>(function Board(
     highlightIndices,
     onPlace,
     reduceMotion = false,
+    interactionDisabled = false,
   },
   ref,
 ) {
@@ -74,8 +76,11 @@ export const Board = forwardRef<HTMLDivElement, BoardProps>(function Board(
                       ? `Row ${r + 1} column ${c + 1}, empty, click to place ${heldTile}`
                       : `Row ${r + 1} column ${c + 1}, empty`
                 }
-                disabled={selecting || !canPlace}
-                onClick={() => onPlace(index)}
+                disabled={interactionDisabled || selecting || !canPlace}
+                onClick={() => {
+                  if (interactionDisabled) return;
+                  onPlace(index);
+                }}
                 className={cn(
                   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-rows",
                   "tile-num aspect-square rounded-xl text-2xl font-semibold transition border",

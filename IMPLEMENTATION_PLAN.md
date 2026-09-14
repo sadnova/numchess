@@ -17,7 +17,7 @@
 | **v4** | shadcn/Tailwind v4 Phase 3 recipe, Playwright PWA offline sequence, rulesVersion vs semver policy, `@numchess/replay` Zod contract, engine CHANGELOG |
 | **v5** | **Progress snapshot**, Phase **3a / 3b** split, **light-only** visual direction, Phase 7 **deferred**, link [Elite UI plan](docs/UI_ELITE_IMPLEMENTATION_PLAN.md) |
 
-**Related docs:** `NUMCHESS_DESIGN_DOCUMENT.md` (game design), `adr/*.md` (decisions), `docs/RULES.md`, [docs/UI_ELITE_IMPLEMENTATION_PLAN.md](docs/UI_ELITE_IMPLEMENTATION_PLAN.md) (Phase 3b), [docs/LIVE_SCORING_AND_AUDIO_PLAN.md](docs/LIVE_SCORING_AND_AUDIO_PLAN.md).
+**Related docs:** `NUMCHESS_DESIGN_DOCUMENT.md` (game design), `adr/*.md` (decisions), `docs/RULES.md`, [docs/UI_ELITE_IMPLEMENTATION_PLAN.md](docs/UI_ELITE_IMPLEMENTATION_PLAN.md) (Phase 3b), [docs/LIVE_SCORING_AND_AUDIO_PLAN.md](docs/LIVE_SCORING_AND_AUDIO_PLAN.md), [docs/SPLIT_DIAGONALS_AND_LIVE_SCORING_V2_PLAN.md](docs/SPLIT_DIAGONALS_AND_LIVE_SCORING_V2_PLAN.md) (split ↘/↙ + dynamic live score), [docs/BOT_AI_IMPROVEMENT_PLAN.md](docs/BOT_AI_IMPROVEMENT_PLAN.md) (Phase 6b — eval aligned with live score, ordering, TT, sims), [docs/VS_BOT_MODE_FIX_PLAN.md](docs/VS_BOT_MODE_FIX_PLAN.md) (Vs bot reliability, input gating, worker hardening).
 
 ---
 

@@ -33,7 +33,7 @@ export function AppTopBar({
             Numchess Ultimate
           </h1>
           <p className="text-xs sm:text-sm text-text-muted mt-0.5 hidden sm:block">
-            P1 rows · P2 columns · shared diagonals
+            P1 rows + ↘ · P2 columns + ↙
           </p>
         </div>
         <div className="flex items-center gap-1 shrink-0">
