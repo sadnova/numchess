@@ -1,4 +1,4 @@
-import { getScoringLines } from "@numchess/engine";
+import { getScoringLines, type GameConfig } from "@numchess/engine";
 
 export type DiagonalGuideSpec = {
   id: string;
@@ -8,10 +8,12 @@ export type DiagonalGuideSpec = {
   role: "main" | "flank";
 };
 
-/** All six scoring diagonals (3 per player) for board visualization. */
-export function getDiagonalGuideSpecs(): DiagonalGuideSpec[] {
-  const rowDiags = getScoringLines("rows").filter((l) => l.id.startsWith("diag-"));
-  const colDiags = getScoringLines("columns").filter((l) =>
+/** Scoring diagonals for board visualization (all diags per player for this mode). */
+export function getDiagonalGuideSpecs(config: GameConfig): DiagonalGuideSpec[] {
+  const rowDiags = getScoringLines("rows", config).filter((l) =>
+    l.id.startsWith("diag-"),
+  );
+  const colDiags = getScoringLines("columns", config).filter((l) =>
     l.id.startsWith("diag-"),
   );
   return [

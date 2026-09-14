@@ -86,4 +86,10 @@ Gate **≥ 85%** bot win rate vs random — **pass** at this sample.
 
 ## Web UX (play)
 
-- **Bot vs bot** spectator mode on `/play` (P1/P2 difficulty, pause/play, pace). **L4/L5** line radiate overlay on scoring plies; honors Reduce motion.
+- **Bot vs bot** spectator mode on `/play` (P1/P2 difficulty, pause/play, pace). **L4/L5** line radiate overlay on scoring plies (Classic); **L5/L6** on Strategic; honors Reduce motion.
+
+## Strategic mode (`2.0.0`, 8×8)
+
+- Bot presets: `searchOptionsForDifficulty(level, "strategic")` adds ~35% time and +1 depth vs Classic (see engine).
+- Sanity sim: `pnpm exec tsx scripts/sim-bot-vs-random.ts --board strategic --games 50 --seed 42`
+- Random fill: `pnpm exec tsx scripts/sim-random.ts --board strategic` (when flag added) or property test `strategic-properties.test.ts`.

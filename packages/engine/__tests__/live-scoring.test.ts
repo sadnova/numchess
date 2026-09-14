@@ -41,8 +41,8 @@ describe("scoreLiveLevels", () => {
   it("empty board has zero levels", () => {
     const s = createInitialState();
     const live = scoreLiveLevels(s);
-    expect(live.rows).toEqual({ 2: 0, 3: 0, 4: 0, 5: 0 });
-    expect(live.columns).toEqual({ 2: 0, 3: 0, 4: 0, 5: 0 });
+    expect(live.rows).toEqual({ 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 });
+    expect(live.columns).toEqual({ 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 });
   });
 
   it("matches evaluateGame when board full", () => {
@@ -68,8 +68,8 @@ describe("scoreCompletedLines", () => {
   it("empty board has zero levels", () => {
     const s = createInitialState();
     const live = scoreCompletedLines(s);
-    expect(live.levels.rows).toEqual({ 2: 0, 3: 0, 4: 0, 5: 0 });
-    expect(live.levels.columns).toEqual({ 2: 0, 3: 0, 4: 0, 5: 0 });
+    expect(live.levels.rows).toEqual({ 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 });
+    expect(live.levels.columns).toEqual({ 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 });
   });
 
   it("matches evaluateGame when board full", () => {

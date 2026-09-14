@@ -45,7 +45,7 @@ it("completed games match global tile totals", () => {
       while (s.phase.kind !== "ended") {
         s = playRandomLegal(s);
       }
-      const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+      const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
       for (const c of s.board) {
         if (c !== null) counts[c] += 1;
       }

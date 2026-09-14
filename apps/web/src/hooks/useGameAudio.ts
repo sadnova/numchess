@@ -17,7 +17,7 @@ export function useGameAudio(settings: AppSettings) {
   const readyRef = useRef(false);
   const prevLeaderRef = useRef<{
     leader: 1 | 2 | null;
-    decisiveLevel: 2 | 3 | 4 | 5 | null;
+    decisiveLevel: 2 | 3 | 4 | 5 | 6 | null;
   } | null>(null);
   const playedLineRef = useRef<Set<string>>(new Set());
 
@@ -113,7 +113,7 @@ export function useGameAudio(settings: AppSettings) {
   );
 
   const playLeadChange = useCallback(
-    (leader: 1 | 2 | null, decisiveLevel: 2 | 3 | 4 | 5 | null) => {
+    (leader: 1 | 2 | null, decisiveLevel: 2 | 3 | 4 | 5 | 6 | null) => {
       if (settings.muteSound) return;
       const prev = prevLeaderRef.current;
       prevLeaderRef.current = { leader, decisiveLevel };

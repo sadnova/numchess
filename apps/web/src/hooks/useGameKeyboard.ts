@@ -1,14 +1,6 @@
+import { tileValuesFor, type TileValue } from "@numchess/engine";
 import { useEffect } from "react";
-import type { TileValue } from "@numchess/engine";
 import { canSelectTile, useGameStore } from "../store/gameStore";
-
-const KEY_TO_TILE: Record<string, TileValue> = {
-  "1": 1,
-  "2": 2,
-  "3": 3,
-  "4": 4,
-  "5": 5,
-};
 
 export function useGameKeyboard(humanCanAct = true) {
   const cancelSelect = useGameStore((s) => s.cancelSelect);
@@ -18,6 +10,7 @@ export function useGameKeyboard(humanCanAct = true) {
   const state = useGameStore((s) => s.state);
 
   useEffect(() => {
+    const tiles = tileValuesFor(state.config);
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape" && phase.kind === "place") {
         cancelSelect();
@@ -27,8 +20,11 @@ export function useGameKeyboard(humanCanAct = true) {
         undo();
       }
       if (phase.kind === "select" && humanCanAct && !e.ctrlKey && !e.metaKey) {
-        const tile = KEY_TO_TILE[e.key];
-        if (tile && canSelectTile(state, tile)) {
+        const n = Number(e.key);
+        if (!Number.isInteger(n)) return;
+        const tile = n as TileValue;
+        if (!tiles.includes(tile)) return;
+        if (canSelectTile(state, tile)) {
           e.preventDefault();
           selectTile(tile);
         }

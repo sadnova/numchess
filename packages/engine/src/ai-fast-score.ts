@@ -1,4 +1,4 @@
-import { BOARD_SIZE } from "./constants.js";
+import { boardSize } from "./config.js";
 import { LEVEL_WEIGHT } from "./ai-weights.js";
 import { evaluateStatic } from "./ai-eval.js";
 import { contributionDeltaScore } from "./ai-ordering.js";
@@ -23,11 +23,12 @@ export interface MoveFastScore {
   staticEval: number;
 }
 
-function centerTiebreak(placeIndex: number): number {
-  const row = Math.floor(placeIndex / BOARD_SIZE);
-  const col = placeIndex % BOARD_SIZE;
-  const dr = row - 2.5;
-  const dc = col - 2.5;
+function centerTiebreak(placeIndex: number, size: number): number {
+  const row = Math.floor(placeIndex / size);
+  const col = placeIndex % size;
+  const mid = (size - 1) / 2;
+  const dr = row - mid;
+  const dc = col - mid;
   return -(dr * dr + dc * dc) * 0.001;
 }
 
@@ -46,15 +47,17 @@ export function scoreMoveFast(
   if (!next) return null;
 
   const mover = moverFromState(state, rootPlayer);
-  const delta = lineScoreDelta(state.board, next.board);
+  const config = state.config;
+  const delta = lineScoreDelta(state.board, next.board, config);
   const liveGain = contributionDeltaScore(delta, mover);
-  const newly = linesNewlyCompleted(state.board, next.board);
+  const newly = linesNewlyCompleted(state.board, next.board, config);
   const completesLine =
     (mover === 1 && newly.player1.length > 0) ||
     (mover === 2 && newly.player2.length > 0);
   const blocksSole = moveBlocksOpponentThreat(tm, move.place);
 
-  let sortKey = liveGain + centerTiebreak(move.place);
+  const size = boardSize(config);
+  let sortKey = liveGain + centerTiebreak(move.place, size);
   if (completesLine) sortKey += COMPLETE_BONUS;
   if (blocksSole) sortKey += BLOCK_BONUS;
   sortKey += evaluateStatic(next, rootPlayer) * 0.0001;

@@ -108,7 +108,11 @@ export function HomePage() {
           <p>Install as a PWA for offline play after your first visit.</p>
         </footer>
       </main>
-      <RulesDialog open={rulesOpen} onClose={() => setRulesOpen(false)} />
+      <RulesDialog
+        open={rulesOpen}
+        boardMode="classic"
+        onClose={() => setRulesOpen(false)}
+      />
     </div>
   );
 }

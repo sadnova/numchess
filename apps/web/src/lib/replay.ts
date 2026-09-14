@@ -1,12 +1,15 @@
 import {
   RULES_VERSION,
+  RULES_VERSION_STRATEGIC,
   applyAction,
   createInitialState,
   evaluateGame,
+  normalizeGameConfig,
   resolveWinner,
   type GameState,
 } from "@numchess/engine";
 import {
+  SUPPORTED_RULES_VERSIONS,
   parseReplayFileSafe,
   type ReplayFile,
 } from "@numchess/replay";
@@ -27,7 +30,12 @@ export function buildReplayFromState(state: GameState): ReplayFile {
   return {
     schema: "numchess-replay/v1",
     rulesVersion: state.config.rulesVersion,
-    config: state.config,
+    config: {
+      boardMode: state.config.boardMode,
+      variant: state.config.variant,
+      rulesVersion: state.config.rulesVersion,
+      boardSize: state.config.boardSize,
+    },
     actions,
     meta: {
       createdAt: new Date().toISOString(),
@@ -40,7 +48,8 @@ export function stateAtReplayStep(
   file: ReplayFile,
   actionCount: number,
 ): GameState | null {
-  let s = createInitialState(file.config);
+  const config = normalizeGameConfig(file.config);
+  let s = createInitialState(config);
   const n = Math.max(0, Math.min(actionCount, file.actions.length));
   for (let i = 0; i < n; i++) {
     const entry = file.actions[i];
@@ -60,6 +69,10 @@ export type ImportReplayResult =
   | { ok: true; state: GameState; warning?: string }
   | { ok: false; error: string };
 
+function rulesVersionSupported(v: string): boolean {
+  return (SUPPORTED_RULES_VERSIONS as readonly string[]).includes(v);
+}
+
 export function importReplayJson(raw: string): ImportReplayResult {
   if (raw.length > MAX_REPLAY_BYTES) {
     return { ok: false, error: "Replay file too large (max 256KB)" };
@@ -70,17 +83,28 @@ export function importReplayJson(raw: string): ImportReplayResult {
     if (!safe.success) {
       return { ok: false, error: "Invalid replay schema" };
     }
+    if (!rulesVersionSupported(safe.data.rulesVersion)) {
+      return {
+        ok: false,
+        error: `Unsupported rules version ${safe.data.rulesVersion}`,
+      };
+    }
     const state = stateFromReplay(safe.data);
     if (!state) {
       return { ok: false, error: "Replay actions could not be applied" };
     }
     let warning: string | undefined;
-    if (safe.data.rulesVersion !== RULES_VERSION) {
-      warning = `Rules version ${safe.data.rulesVersion} differs from app ${RULES_VERSION}`;
+    const appClassic = RULES_VERSION;
+    const appStrategic = RULES_VERSION_STRATEGIC;
+    if (
+      safe.data.rulesVersion !== appClassic &&
+      safe.data.rulesVersion !== appStrategic
+    ) {
+      warning = `Rules version ${safe.data.rulesVersion} differs from app`;
     }
     if (state.board.every((c) => c !== null)) {
       const { levels, ledger } = evaluateGame(state);
-      resolveWinner(levels, ledger);
+      resolveWinner(levels, ledger, state.config);
     }
     return { ok: true, state, warning };
   } catch {

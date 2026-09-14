@@ -1,5 +1,6 @@
 import { applyCompoundMove } from "./ai.js";
-import type { TileValue } from "./constants.js";
+import type { GameConfig, TileValue } from "./constants.js";
+import { DEFAULT_GAME_CONFIG } from "./constants.js";
 import { createInitialState } from "./state.js";
 import type { GameState } from "./types.js";
 
@@ -24,8 +25,9 @@ export function createSandboxState(): GameState {
 
 export function createInitialStateWithFirstPlayer(
   player: 1 | 2,
+  config: GameConfig = DEFAULT_GAME_CONFIG,
 ): GameState {
-  const s = createInitialState();
+  const s = createInitialState(config);
   if (player === 2) {
     return { ...s, phase: { kind: "select", player: 2 } };
   }

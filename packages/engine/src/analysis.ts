@@ -1,13 +1,9 @@
 /**
  * Partial-line UX analysis (not used for scoring).
- * Threat bands:
- * - building: partial R/D approaching a scoring threshold
- * - threat: strong partial pattern on the line
- * - critical: a full-line L5 repetition or L5 diversity is still reachable
- *   using tiles remaining in **both** inventories combined; otherwise a line
- *   that looks decisive but cannot be finished is downgraded (ghost threat)
  */
-import { TILE_VALUES, type TileValue } from "./constants.js";
+import { DEFAULT_GAME_CONFIG, type GameConfig } from "./constants.js";
+import { tileValuesFor } from "./config.js";
+import type { TileValue } from "./constants.js";
 import { getLineCells, getScoringLines } from "./lines.js";
 import { analyzeLine } from "./patterns.js";
 import type { GameState, LineAnalysis, Perspective, PlayerId } from "./types.js";
@@ -27,19 +23,26 @@ function perspectiveForPlayer(player: PlayerId): Perspective {
   return player === 1 ? "rows" : "columns";
 }
 
-export function analyzePartialLine(cells: TileValue[]): LineAnalysis {
+export function analyzePartialLine(
+  cells: TileValue[],
+  config: GameConfig = DEFAULT_GAME_CONFIG,
+): LineAnalysis {
   if (cells.length === 0) {
     return { cells: [], R: 0, D: 0, contributions: [] };
   }
-  return analyzeLine(cells);
+  return analyzeLine(cells, config);
 }
 
 export function combinedInventoryCounts(
   state: GameState,
 ): Record<TileValue, number> {
-  const out: Record<TileValue, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+  const tiles = tileValuesFor(state.config);
+  const out = Object.fromEntries(tiles.map((v) => [v, 0])) as Record<
+    TileValue,
+    number
+  >;
   for (const inv of state.inventories) {
-    for (const v of TILE_VALUES) {
+    for (const v of tiles) {
       out[v] += inv.counts[v];
     }
   }
@@ -52,24 +55,33 @@ function cloneCounts(
   return { ...counts };
 }
 
-/** Whether `slotsLeft` placements from `available` can complete a line with R≥5 or D≥5. */
+function topScoringLevel(config: GameConfig): number {
+  return config.scoring.cap;
+}
+
+/** Whether a full line can still reach top-tier R or D from `partial`. */
 export function canReachL5OnLine(
   partial: TileValue[],
   slotsLeft: number,
   available: Record<TileValue, number>,
   lineLength = 6,
+  config: GameConfig = DEFAULT_GAME_CONFIG,
 ): boolean {
+  const top = topScoringLevel(config);
+  const tiles = tileValuesFor(config);
   if (slotsLeft < 0 || partial.length + slotsLeft !== lineLength) return false;
   if (slotsLeft === 0) {
     if (partial.length !== lineLength) return false;
-    const a = analyzeLine(partial);
-    return a.R >= 5 || a.D >= 5;
+    const a = analyzeLine(partial, config);
+    return a.R >= top || a.D >= top;
   }
-  for (const v of TILE_VALUES) {
+  for (const v of tiles) {
     if (available[v] <= 0) continue;
     const next = cloneCounts(available);
     next[v] -= 1;
-    if (canReachL5OnLine([...partial, v], slotsLeft - 1, next, lineLength)) {
+    if (
+      canReachL5OnLine([...partial, v], slotsLeft - 1, next, lineLength, config)
+    ) {
       return true;
     }
   }
@@ -80,22 +92,32 @@ export function classifyLineBand(
   cells: TileValue[],
   inventory: Record<TileValue, number>,
   lineLength = 6,
+  config: GameConfig = DEFAULT_GAME_CONFIG,
 ): ThreatBand {
   const filled = cells.length;
   if (filled === 0) return "safe";
 
-  const analysis = analyzePartialLine(cells);
+  const analysis = analyzePartialLine(cells, config);
   const slotsLeft = lineLength - filled;
-  const achievableL5 = canReachL5OnLine(cells, slotsLeft, inventory, lineLength);
+  const top = topScoringLevel(config);
+  const achievableTop = canReachL5OnLine(
+    cells,
+    slotsLeft,
+    inventory,
+    lineLength,
+    config,
+  );
   const onBoardDecisive =
-    filled >= 5 && (analysis.R >= 5 || analysis.D >= 5);
+    filled >= lineLength - 1 && (analysis.R >= top || analysis.D >= top);
 
   if (onBoardDecisive) {
-    return achievableL5 ? "critical" : "threat";
+    return achievableTop ? "critical" : "threat";
   }
-  if (achievableL5 && filled >= 4) return "critical";
-  if (analysis.R >= 4 || analysis.D >= 4) return "threat";
-  if (analysis.R >= 2 || analysis.D >= 3) return "building";
+  if (achievableTop && filled >= lineLength - 2) return "critical";
+  if (analysis.R >= top - 1 || analysis.D >= top - 1) return "threat";
+  const minR = config.scoring.minR;
+  const minD = config.scoring.minD;
+  if (analysis.R >= minR || analysis.D >= minD + 1) return "building";
   return "safe";
 }
 
@@ -110,7 +132,6 @@ function maxBand(a: ThreatBand, b: ThreatBand): ThreatBand {
   return BAND_RANK[b] > BAND_RANK[a] ? b : a;
 }
 
-/** Opponent scoring lines that share a cell with `lineIndices` at threat+ pressure. */
 function opponentPressureBand(
   state: GameState,
   lineIndices: number[],
@@ -123,6 +144,7 @@ function opponentPressureBand(
   for (const insight of oppInsights) {
     const oppCells = getScoringLines(
       opponent === 1 ? "rows" : "columns",
+      state.config,
     ).find((l) => l.id === insight.lineId)?.indices;
     if (!oppCells?.some((i) => cellSet.has(i))) continue;
     if (insight.band === "critical" || insight.band === "threat") {
@@ -138,19 +160,20 @@ function analyzePositionForPlayerRaw(
   state: GameState,
   player: PlayerId,
 ): LineInsight[] {
+  const config = state.config;
   const perspective = perspectiveForPlayer(player);
   const inventory = combinedInventoryCounts(state);
   const insights: LineInsight[] = [];
-  for (const line of getScoringLines(perspective)) {
+  for (const line of getScoringLines(perspective, config)) {
     const cells = getLineCells(state.board, line.indices);
-    const analysis = analyzePartialLine(cells);
+    const analysis = analyzePartialLine(cells, config);
     insights.push({
       lineId: line.id,
       label: line.label,
       filled: cells.length,
       lineLength: line.indices.length,
       analysis,
-      band: classifyLineBand(cells, inventory, line.indices.length),
+      band: classifyLineBand(cells, inventory, line.indices.length, config),
     });
   }
   return insights;
@@ -160,9 +183,10 @@ export function analyzePositionForPlayer(
   state: GameState,
   player: PlayerId,
 ): LineInsight[] {
+  const config = state.config;
   const base = analyzePositionForPlayerRaw(state, player);
   return base.map((insight) => {
-    const line = getScoringLines(perspectiveForPlayer(player)).find(
+    const line = getScoringLines(perspectiveForPlayer(player), config).find(
       (l) => l.id === insight.lineId,
     );
     if (!line) return insight;

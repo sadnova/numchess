@@ -4,12 +4,26 @@ export {
   DEFAULT_GAME_CONFIG,
   GLOBAL_BOARD_TOTALS,
   RULES_VERSION,
+  RULES_VERSION_STRATEGIC,
   STARTING_INVENTORY,
+  STRATEGIC_STARTING_INVENTORY,
   TILE_VALUES,
+  type BoardMode,
   type GameConfig,
   type GameVariant,
+  type ScoringProfile,
   type TileValue,
 } from "./constants.js";
+export {
+  boardSize,
+  cellCount,
+  configForBoardMode,
+  emptyLevelCounts,
+  getGameConfigForRulesVersion,
+  inventoryFor,
+  normalizeGameConfig,
+  tileValuesFor,
+} from "./config.js";
 export {
   analyzePartialLine,
   analyzePositionForPlayer,
@@ -20,11 +34,7 @@ export {
 } from "./analysis.js";
 export type { LineInsight, ThreatBand } from "./analysis.js";
 export { getFilledLineCells, getLineCells, getScoringLines, indexToRowCol, indicesWithRowMinusCol, indicesWithRowPlusCol, rowColToIndex } from "./lines.js";
-export {
-  addContributions,
-  analyzeLine,
-  emptyLevelCounts,
-} from "./patterns.js";
+export { addContributions, analyzeLine } from "./patterns.js";
 export {
   assertBoardFullForScoring,
   buildLedger,

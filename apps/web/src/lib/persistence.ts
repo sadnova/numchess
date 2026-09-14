@@ -1,5 +1,9 @@
 import {
+  configForBoardMode,
+  normalizeGameConfig,
   searchOptionsForDifficulty,
+  type BoardMode,
+  type GameConfig,
   type GameState,
   type SearchOptions,
 } from "@numchess/engine";
@@ -19,9 +23,16 @@ function parseGameMode(value: unknown): GameMode {
 
 export type BotDifficulty = "easy" | "medium" | "hard";
 
+export type { BoardMode };
+
+function parseBoardMode(value: unknown): BoardMode {
+  return value === "strategic" ? "strategic" : "classic";
+}
+
 export type HumanSeat = 1 | 2;
 
 export interface AppSettings {
+  boardMode: BoardMode;
   showRowOverlays: boolean;
   showColOverlays: boolean;
   showDiagOverlays: boolean;
@@ -48,6 +59,7 @@ export interface AppSettings {
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
+  boardMode: "classic",
   showRowOverlays: true,
   showColOverlays: true,
   showDiagOverlays: true,
@@ -76,8 +88,21 @@ export function botTimeMs(difficulty: BotDifficulty): number {
   return botSearchOptions(difficulty).timeMs ?? 800;
 }
 
-export function botSearchOptions(difficulty: BotDifficulty): SearchOptions {
-  return searchOptionsForDifficulty(difficulty);
+export function botSearchOptions(
+  difficulty: BotDifficulty,
+  boardMode: BoardMode = "classic",
+): SearchOptions {
+  return searchOptionsForDifficulty(difficulty, boardMode);
+}
+
+export function isAppSettings(value: unknown): value is AppSettings {
+  if (!value || typeof value !== "object") return false;
+  const v = value as Partial<AppSettings>;
+  return (
+    typeof v.gameMode === "string" &&
+    (GAME_MODES as readonly string[]).includes(v.gameMode) &&
+    (v.boardMode === "classic" || v.boardMode === "strategic")
+  );
 }
 
 export function loadSettings(): AppSettings {
@@ -89,6 +114,7 @@ export function loadSettings(): AppSettings {
       ...DEFAULT_SETTINGS,
       ...parsed,
       gameMode: parseGameMode(parsed.gameMode),
+      boardMode: parseBoardMode(parsed.boardMode),
     };
   } catch {
     return { ...DEFAULT_SETTINGS };
@@ -115,16 +141,31 @@ export function resolveFirstPlayer(settings: AppSettings): {
   return { first: 1, settingsPatch: {} };
 }
 
+export function gameConfigForSettings(settings: AppSettings): GameConfig {
+  return configForBoardMode(settings.boardMode);
+}
+
 export function loadResumeGame(): GameState | null {
   try {
     const raw = localStorage.getItem(RESUME_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as GameState;
     if (!parsed?.board || parsed.phase?.kind === "ended") return null;
-    return parsed;
+    const config = normalizeGameConfig(parsed.config ?? {});
+    if (parsed.board.length !== config.boardSize * config.boardSize) return null;
+    return { ...parsed, config };
   } catch {
     return null;
   }
+}
+
+/** Drop resume when it does not match current settings board mode. */
+export function resumeMatchesSettings(
+  state: GameState,
+  settings: AppSettings,
+): boolean {
+  const config = normalizeGameConfig(state.config);
+  return config.boardMode === settings.boardMode;
 }
 
 export function saveResumeGame(state: GameState): void {

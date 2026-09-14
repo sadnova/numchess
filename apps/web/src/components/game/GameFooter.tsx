@@ -35,7 +35,7 @@ export function GameFooter({
             <Button variant="secondary" onClick={onUndo}>
               Undo
             </Button>
-            <Button variant="secondary" onClick={onNewGame}>
+            <Button variant="secondary" onClick={() => onNewGame()}>
               New game
             </Button>
           </>

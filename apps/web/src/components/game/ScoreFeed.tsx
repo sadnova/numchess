@@ -10,7 +10,7 @@ export function ScoreFeed({ entries }: { entries: ScoreFeedEntry[] }) {
       <ul className="space-y-1 text-xs text-text-muted">
         {entries.map((e, i) => (
           <li
-            key={e.id}
+            key={`${e.id}-${i}`}
             className="rounded-md bg-surface-2/40 px-2 py-1 border border-border-subtle/60"
             aria-live={i === 0 ? "polite" : undefined}
           >

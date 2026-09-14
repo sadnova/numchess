@@ -6,11 +6,12 @@ export type CellRect = { x: number; y: number; w: number; h: number };
 function orderedRects(
   indices: number[],
   rects: Map<number, CellRect>,
+  boardSize: number,
 ): CellRect[] {
   return [...indices]
     .sort((a, b) => {
-      const ra = indexToRowCol(a);
-      const rb = indexToRowCol(b);
+      const ra = indexToRowCol(a, boardSize);
+      const rb = indexToRowCol(b, boardSize);
       return ra.row - rb.row || ra.col - rb.col;
     })
     .map((i) => rects.get(i))
@@ -93,8 +94,9 @@ function gapBridge(
 export function connectedGuidePath(
   guide: DiagonalGuideSpec,
   rects: Map<number, CellRect>,
+  boardSize: number,
 ): string | null {
-  const chain = orderedRects(guide.indices, rects);
+  const chain = orderedRects(guide.indices, rects, boardSize);
   if (chain.length === 0) return null;
 
   const outset = chainOutset(chain);

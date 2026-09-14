@@ -1,18 +1,18 @@
 import type { LevelCountsPair } from "@numchess/engine";
 import { cn } from "@/lib/utils";
 
-const LEVELS = [5, 4, 3, 2] as const;
-
 export function LiveScorePanel({
   levels,
   leader,
   decisiveLevel,
   pulseKey,
+  tiebreakLevels,
 }: {
   levels: LevelCountsPair;
   leader: 1 | 2 | null;
-  decisiveLevel: 2 | 3 | 4 | 5 | null;
+  decisiveLevel: 2 | 3 | 4 | 5 | 6 | null;
   pulseKey?: string;
+  tiebreakLevels: readonly (2 | 3 | 4 | 5 | 6)[];
 }) {
   return (
     <section
@@ -29,7 +29,7 @@ export function LiveScorePanel({
         <span className="text-center">Lv</span>
         <span className="text-accent-cols">Cols</span>
       </div>
-      {LEVELS.map((lv) => (
+      {tiebreakLevels.map((lv) => (
         <div
           key={lv}
           className={cn(

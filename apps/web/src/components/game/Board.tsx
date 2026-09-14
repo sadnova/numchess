@@ -1,9 +1,5 @@
 import { forwardRef, useCallback, useState } from "react";
-import {
-  BOARD_SIZE,
-  indexToRowCol,
-  type TileValue,
-} from "@numchess/engine";
+import { indexToRowCol, type TileValue } from "@numchess/engine";
 import type { GameState } from "@numchess/engine";
 import { tileValueClass } from "@/lib/tileStyles";
 import { cn } from "@/lib/utils";
@@ -44,6 +40,7 @@ export const Board = forwardRef<HTMLDivElement, BoardProps>(function Board(
   },
   ref,
 ) {
+  const boardSize = state.config.boardSize;
   const [gridEl, setGridEl] = useState<HTMLDivElement | null>(null);
   const gridRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -57,7 +54,11 @@ export const Board = forwardRef<HTMLDivElement, BoardProps>(function Board(
   return (
     <div
       data-testid="app-board-wrap"
-      className="w-full max-w-[min(92vw,420px)]"
+      className={
+        boardSize > 6
+          ? "w-full max-w-[min(92vw,480px)]"
+          : "w-full max-w-[min(92vw,420px)]"
+      }
     >
       <div className="relative w-full">
         <div
@@ -69,20 +70,20 @@ export const Board = forwardRef<HTMLDivElement, BoardProps>(function Board(
               : "bg-surface-2/90 border-border-subtle",
           )}
           style={{
-            gridTemplateColumns: `repeat(${BOARD_SIZE}, minmax(44px, 1fr))`,
+            gridTemplateColumns: `repeat(${boardSize}, minmax(${boardSize > 6 ? 36 : 44}px, 1fr))`,
           }}
           ref={gridRef}
           data-testid="app-board"
           role="grid"
-          aria-rowcount={BOARD_SIZE}
-          aria-colcount={BOARD_SIZE}
+          aria-rowcount={boardSize}
+          aria-colcount={boardSize}
           aria-label="Shared game board"
         >
-      {Array.from({ length: BOARD_SIZE }, (_, row) => (
+      {Array.from({ length: boardSize }, (_, row) => (
         <div role="row" aria-rowindex={row + 1} key={row} className="contents">
-          {Array.from({ length: BOARD_SIZE }, (_, col) => {
-            const index = row * BOARD_SIZE + col;
-            const { row: r, col: c } = indexToRowCol(index);
+          {Array.from({ length: boardSize }, (_, col) => {
+            const index = row * boardSize + col;
+            const { row: r, col: c } = indexToRowCol(index, boardSize);
             const value = state.board[index];
             const canPlace = legalPlaces.includes(index);
             const onLine = highlightIndices?.includes(index) ?? false;
@@ -138,10 +139,15 @@ export const Board = forwardRef<HTMLDivElement, BoardProps>(function Board(
       ))}
         </div>
         {showDiagonalGuides && gridEl ? (
-          <DiagonalGuidesOverlay gridEl={gridEl} />
+          <DiagonalGuidesOverlay
+            gridEl={gridEl}
+            cellCount={boardSize * boardSize}
+            config={state.config}
+          />
         ) : null}
         <LineCelebrationOverlay
           gridEl={gridEl}
+          cellCount={boardSize * boardSize}
           events={celebrationEvents}
           reduceMotion={reduceMotion}
         />

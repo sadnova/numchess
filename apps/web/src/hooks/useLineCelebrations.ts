@@ -1,14 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { CellValue } from "@numchess/engine";
+import type { CellValue, GameConfig } from "@numchess/engine";
 import {
   celebrationsFromBoards,
+  isTopTierCelebration,
+  topCelebrationLevel,
   type LineCelebrationEvent,
 } from "@/lib/lineCelebration";
 import { celebrationHoldForLevel } from "@/lib/spectatorTiming";
 
 export function useLineCelebrations(
   reduceMotion: boolean,
-  onLevel5Celebrate?: () => void,
+  config: GameConfig,
+  onTopTierCelebrate?: () => void,
 ) {
   const [activeEvents, setActiveEvents] = useState<LineCelebrationEvent[]>([]);
   const celebrationHoldMsRef = useRef(0);
@@ -16,15 +19,12 @@ export function useLineCelebrations(
 
   const onPlyScored = useCallback(
     (prevBoard: CellValue[], nextBoard: CellValue[]) => {
-      const events = celebrationsFromBoards(prevBoard, nextBoard);
+      const events = celebrationsFromBoards(prevBoard, nextBoard, config);
       if (events.length === 0) {
         celebrationHoldMsRef.current = 0;
         return;
       }
-      const maxLevel = events.reduce<4 | 5 | null>(
-        (acc, e) => (acc === null || e.level > acc ? e.level : acc),
-        null,
-      );
+      const maxLevel = topCelebrationLevel(events);
       const hold = celebrationHoldForLevel(maxLevel, reduceMotion);
       celebrationHoldMsRef.current = hold;
 
@@ -33,8 +33,11 @@ export function useLineCelebrations(
         return;
       }
 
-      if (maxLevel === 5) {
-        onLevel5Celebrate?.();
+      if (
+        maxLevel !== null &&
+        isTopTierCelebration(maxLevel, config)
+      ) {
+        onTopTierCelebrate?.();
       }
 
       setActiveEvents(events);
@@ -44,7 +47,7 @@ export function useLineCelebrations(
         setActiveEvents([]);
       }, hold);
     },
-    [reduceMotion, onLevel5Celebrate],
+    [reduceMotion, onTopTierCelebrate, config],
   );
 
   useEffect(

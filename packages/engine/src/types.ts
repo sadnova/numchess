@@ -28,7 +28,7 @@ export interface Inventory {
   counts: Record<TileValue, number>;
 }
 
-export type LevelCounts = Record<2 | 3 | 4 | 5, number>;
+export type LevelCounts = Record<2 | 3 | 4 | 5 | 6, number>;
 
 export interface LevelCountsPair {
   rows: LevelCounts;
@@ -36,7 +36,7 @@ export interface LevelCountsPair {
 }
 
 export interface LineContribution {
-  level: 2 | 3 | 4 | 5;
+  level: 2 | 3 | 4 | 5 | 6;
   kind: "repetition" | "diversity";
 }
 
@@ -58,7 +58,7 @@ export type GameResult =
   | {
       outcome: "win";
       winner: PlayerId;
-      decisiveLevel: 2 | 3 | 4 | 5;
+      decisiveLevel: 2 | 3 | 4 | 5 | 6;
       levels: LevelCountsPair;
       ledger: { player1: LineLedgerEntry[]; player2: LineLedgerEntry[] };
     }

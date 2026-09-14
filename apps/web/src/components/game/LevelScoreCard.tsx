@@ -1,21 +1,21 @@
 import type { LevelCountsPair } from "@numchess/engine";
 import { cn } from "@/lib/utils";
 
-const LEVELS = [5, 4, 3, 2] as const;
-
 export function LevelScoreCard({
   levels,
+  tiebreakLevels,
   decisiveLevel,
   outcome,
   winner,
 }: {
   levels: LevelCountsPair;
-  decisiveLevel?: 2 | 3 | 4 | 5;
+  tiebreakLevels: readonly (2 | 3 | 4 | 5 | 6)[];
+  decisiveLevel?: 2 | 3 | 4 | 5 | 6;
   outcome: "win" | "draw";
   winner?: 1 | 2;
 }) {
   const max = Math.max(
-    ...LEVELS.flatMap((lv) => [levels.rows[lv], levels.columns[lv]]),
+    ...tiebreakLevels.flatMap((lv) => [levels.rows[lv], levels.columns[lv]]),
     1,
   );
 
@@ -26,7 +26,7 @@ export function LevelScoreCard({
         <span>Level</span>
         <span className="text-accent-cols">Cols (P2)</span>
       </div>
-      {LEVELS.map((lv) => {
+      {tiebreakLevels.map((lv) => {
         const r = levels.rows[lv];
         const c = levels.columns[lv];
         const isDecisive = outcome === "win" && decisiveLevel === lv;

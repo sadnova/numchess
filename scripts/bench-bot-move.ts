@@ -1,24 +1,25 @@
 import {
   chooseBotMove,
+  configForBoardMode,
   createInitialState,
   createSandboxState,
   searchOptionsForDifficulty,
+  type BoardMode,
 } from "@numchess/engine";
-
-const FIXTURES: { name: string; state: ReturnType<typeof createInitialState> }[] =
-  [
-    { name: "opening", state: createInitialState() },
-    { name: "mid", state: createSandboxState() },
-  ];
 
 function parseArgs() {
   let iterations = 20;
   let smoke = false;
+  let boardMode: BoardMode = "classic";
   for (let i = 2; i < process.argv.length; i++) {
     if (process.argv[i] === "--iter") iterations = Number(process.argv[++i]);
     if (process.argv[i] === "--smoke") smoke = true;
+    if (process.argv[i] === "--board") {
+      const v = process.argv[++i];
+      boardMode = v === "strategic" ? "strategic" : "classic";
+    }
   }
-  return { iterations, smoke };
+  return { iterations, smoke, boardMode };
 }
 
 function percentile(sorted: number[], p: number): number {
@@ -26,8 +27,16 @@ function percentile(sorted: number[], p: number): number {
   return sorted[Math.max(0, idx)] ?? 0;
 }
 
-const { iterations, smoke } = parseArgs();
-const opts = searchOptionsForDifficulty("medium");
+const { iterations, smoke, boardMode } = parseArgs();
+const config = configForBoardMode(boardMode);
+const FIXTURES: { name: string; state: ReturnType<typeof createInitialState> }[] =
+  [
+    { name: "opening", state: createInitialState(config) },
+    ...(boardMode === "classic"
+      ? [{ name: "mid", state: createSandboxState() }]
+      : []),
+  ];
+const opts = searchOptionsForDifficulty("medium", boardMode);
 const results: Record<string, { p50: number; p95: number; n: number }> = {};
 
 function fixturePlayer(state: ReturnType<typeof createInitialState>): 1 | 2 {
@@ -53,7 +62,9 @@ for (const { name, state } of FIXTURES) {
   };
 }
 
-console.log(JSON.stringify({ difficulty: "medium", opts, results }, null, 2));
+console.log(
+  JSON.stringify({ difficulty: "medium", boardMode, opts, results }, null, 2),
+);
 
 if (smoke && (results.opening?.p95 ?? 9999) > 450) {
   process.exitCode = 1;

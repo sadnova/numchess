@@ -1,10 +1,14 @@
 import {
-  CELL_COUNT,
   DEFAULT_GAME_CONFIG,
-  STARTING_INVENTORY,
   type GameConfig,
   type TileValue,
 } from "./constants.js";
+import {
+  cellCount,
+  inventoryFor,
+  normalizeGameConfig,
+  tileValuesFor,
+} from "./config.js";
 import { evaluateGame } from "./scoring.js";
 import { resolveWinner } from "./winner.js";
 import type {
@@ -19,35 +23,29 @@ import type {
 } from "./types.js";
 import { err, ok } from "./types.js";
 
-function cloneInventory(): Inventory {
-  return { counts: { ...STARTING_INVENTORY } };
+function cloneInventory(config: GameConfig): Inventory {
+  return { counts: { ...inventoryFor(config) } };
 }
 
-function emptyBoard(): CellValue[] {
-  return Array.from({ length: CELL_COUNT }, () => null);
+function emptyBoard(config: GameConfig): CellValue[] {
+  return Array.from({ length: cellCount(config) }, () => null);
 }
 
 function playerIndex(player: PlayerId): 0 | 1 {
   return player === 1 ? 0 : 1;
 }
 
-function activePlayer(state: GameState): PlayerId {
-  if (state.phase.kind === "ended") {
-    throw new Error("No active player");
-  }
-  return state.phase.player;
-}
-
 export function createInitialState(
   config: GameConfig = DEFAULT_GAME_CONFIG,
 ): GameState {
+  const normalized = normalizeGameConfig(config);
   return {
-    board: emptyBoard(),
-    inventories: [cloneInventory(), cloneInventory()],
+    board: emptyBoard(normalized),
+    inventories: [cloneInventory(normalized), cloneInventory(normalized)],
     phase: { kind: "select", player: 1 },
     ply: 0,
     history: [],
-    config,
+    config: normalized,
   };
 }
 
@@ -56,10 +54,11 @@ export function getLegalActions(state: GameState): LegalAction[] {
 
   const player = state.phase.player;
   const inv = state.inventories[playerIndex(player)];
+  const tiles = tileValuesFor(state.config);
 
   if (state.phase.kind === "select") {
     const actions: LegalAction[] = [];
-    for (const value of [1, 2, 3, 4, 5] as TileValue[]) {
+    for (const value of tiles) {
       if (inv.counts[value] > 0) {
         actions.push({ type: "SELECT", value });
       }
@@ -68,7 +67,8 @@ export function getLegalActions(state: GameState): LegalAction[] {
   }
 
   const actions: LegalAction[] = [];
-  for (let i = 0; i < CELL_COUNT; i++) {
+  const n = cellCount(state.config);
+  for (let i = 0; i < n; i++) {
     if (state.board[i] === null) {
       actions.push({ type: "PLACE", index: i });
     }
@@ -81,7 +81,7 @@ function finalizeIfFull(state: GameState): GameState {
     return state;
   }
   const { levels, ledger } = evaluateGame(state);
-  const result = resolveWinner(levels, ledger);
+  const result = resolveWinner(levels, ledger, state.config);
   return {
     ...state,
     phase: { kind: "ended", result },
@@ -97,10 +97,14 @@ export function applyAction(
   }
 
   const player = state.phase.player;
+  const n = cellCount(state.config);
 
   if (action.type === "SELECT") {
     if (state.phase.kind !== "select") return err("WRONG_PHASE");
     const inv = state.inventories[playerIndex(player)];
+    if (!tileValuesFor(state.config).includes(action.value)) {
+      return err("INVALID_TILE");
+    }
     if (inv.counts[action.value] <= 0) return err("TILE_UNAVAILABLE");
     const next: GameState = {
       ...state,
@@ -112,7 +116,7 @@ export function applyAction(
 
   if (action.type === "PLACE") {
     if (state.phase.kind !== "place") return err("WRONG_PHASE");
-    if (action.index < 0 || action.index >= CELL_COUNT) {
+    if (action.index < 0 || action.index >= n) {
       return err("INVALID_INDEX");
     }
     if (state.board[action.index] !== null) return err("CELL_OCCUPIED");
@@ -139,7 +143,7 @@ export function applyAction(
       phase: { kind: "select", player: nextPlayer },
     };
 
-    if (ply >= CELL_COUNT) {
+    if (ply >= n) {
       next = finalizeIfFull(next);
     }
 

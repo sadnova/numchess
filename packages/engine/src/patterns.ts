@@ -1,7 +1,12 @@
+import { DEFAULT_GAME_CONFIG, type GameConfig } from "./constants.js";
 import type { TileValue } from "./constants.js";
 import type { LineAnalysis, LineContribution } from "./types.js";
+import { emptyLevelCounts } from "./config.js";
 
-export function analyzeLine(cells: TileValue[]): LineAnalysis {
+export function analyzeLine(
+  cells: TileValue[],
+  config: GameConfig = DEFAULT_GAME_CONFIG,
+): LineAnalysis {
   const frequencies: Record<number, number> = {};
   for (const c of cells) {
     frequencies[c] = (frequencies[c] ?? 0) + 1;
@@ -10,19 +15,22 @@ export function analyzeLine(cells: TileValue[]): LineAnalysis {
   for (const count of Object.values(frequencies)) {
     if (count > R) R = count;
   }
-  R = Math.min(5, R);
-  const D = Math.min(5, Object.keys(frequencies).length);
+  const cap = config.scoring.cap;
+  const minR = config.scoring.minR;
+  const minD = config.scoring.minD;
+  R = Math.min(cap, R);
+  const D = Math.min(cap, Object.keys(frequencies).length);
 
   const contributions: LineContribution[] = [];
-  if (R >= 2) {
+  if (R >= minR) {
     contributions.push({
-      level: R as 2 | 3 | 4 | 5,
+      level: R as LineContribution["level"],
       kind: "repetition",
     });
   }
-  if (D >= 2) {
+  if (D >= minD) {
     contributions.push({
-      level: D as 2 | 3 | 4 | 5,
+      level: D as LineContribution["level"],
       kind: "diversity",
     });
   }
@@ -30,12 +38,10 @@ export function analyzeLine(cells: TileValue[]): LineAnalysis {
   return { cells: [...cells], R, D, contributions };
 }
 
-export function emptyLevelCounts(): Record<2 | 3 | 4 | 5, number> {
-  return { 2: 0, 3: 0, 4: 0, 5: 0 };
-}
+export { emptyLevelCounts };
 
 export function addContributions(
-  counts: Record<2 | 3 | 4 | 5, number>,
+  counts: import("./types.js").LevelCounts,
   contributions: LineContribution[],
 ): void {
   for (const c of contributions) {

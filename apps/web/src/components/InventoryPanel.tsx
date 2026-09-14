@@ -1,7 +1,11 @@
-import { STARTING_INVENTORY, type GameState, type PlayerId, type TileValue } from "@numchess/engine";
+import {
+  inventoryFor,
+  tileValuesFor,
+  type GameState,
+  type PlayerId,
+  type TileValue,
+} from "@numchess/engine";
 import { cn } from "@/lib/utils";
-
-const TILES: TileValue[] = [1, 2, 3, 4, 5];
 
 export function InventoryPanel({
   player,
@@ -21,6 +25,8 @@ export function InventoryPanel({
   canSelect: (v: TileValue) => boolean;
 }) {
   const inv = state.inventories[player - 1].counts;
+  const tiles = tileValuesFor(state.config);
+  const starting = inventoryFor(state.config);
   const role = player === 1 ? "Rows" : "Columns";
   const isRows = player === 1;
   const holding = isTurn && heldTile !== null;
@@ -59,8 +65,8 @@ export function InventoryPanel({
         )}
       </div>
       <div className="flex flex-wrap gap-2 justify-center">
-        {TILES.map((t) => {
-          const max = STARTING_INVENTORY[t];
+        {tiles.map((t) => {
+          const max = starting[t];
           const left = inv[t];
           const isHeld = holding && heldTile === t;
           const canPick =

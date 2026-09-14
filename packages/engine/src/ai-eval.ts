@@ -23,15 +23,19 @@ export function evalLiveLevelDiff(
   state: GameState,
   rootPlayer: PlayerId,
 ): number {
-  const rows = scoreLinesFromBoard(state.board, "rows").counts;
-  const cols = scoreLinesFromBoard(state.board, "columns").counts;
+  const config = state.config;
+  const rows = scoreLinesFromBoard(state.board, "rows", config).counts;
+  const cols = scoreLinesFromBoard(state.board, "columns", config).counts;
   const rowsW = weightedLevels(rows);
   const colsW = weightedLevels(cols);
   return rootPlayer === 1 ? rowsW - colsW : colsW - rowsW;
 }
 
 function evalLexBonus(state: GameState, rootPlayer: PlayerId): number {
-  const { leader, decisiveLevel } = liveScoreLeader(scoreLiveLevels(state));
+  const { leader, decisiveLevel } = liveScoreLeader(
+    scoreLiveLevels(state),
+    state.config,
+  );
   if (leader === null || decisiveLevel === null) return 0;
   const magnitude = (6 - decisiveLevel) * AI_EVAL_WEIGHTS.lexPerLevel;
   return leader === rootPlayer ? magnitude : -magnitude;
@@ -66,7 +70,7 @@ export function evaluatePosition(
 
   if (state.board.every((c) => c !== null)) {
     const { levels, ledger } = evaluateGame(state);
-    const result = resolveWinner(levels, ledger);
+    const result = resolveWinner(levels, ledger, state.config);
     if (result.outcome === "draw") return 0;
     return result.winner === rootPlayer ? WIN_SCORE : -WIN_SCORE;
   }

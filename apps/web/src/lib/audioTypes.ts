@@ -25,7 +25,9 @@ export type AudioManifest = {
   sources: Record<SfxId, ManifestSource>;
 };
 
-export function maxContributionLevel(contributions: LineContribution[]): 2 | 3 | 4 | 5 | null {
+export function maxContributionLevel(
+  contributions: LineContribution[],
+): 2 | 3 | 4 | 5 | 6 | null {
   if (contributions.length === 0) return null;
   return contributions.reduce(
     (max, c) => (c.level > max ? c.level : max),

@@ -214,7 +214,10 @@ export function useBotPlayer(config: BotPlayerConfig) {
 
     const id = ++reqId.current;
     const state = current;
-    const options = botSearchOptions(difficultyForSeat(cfg, player));
+    const options = botSearchOptions(
+      difficultyForSeat(cfg, player),
+      state.config.boardMode,
+    );
     const timeoutMs = (options.timeMs ?? 800) + 250;
 
     const onMessage = (event: MessageEvent<BotWorkerResponse>) => {

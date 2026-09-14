@@ -3,7 +3,10 @@ import type { LineCelebrationEvent } from "@/lib/lineCelebration";
 
 type CellRect = { x: number; y: number; w: number; h: number };
 
-function useCellRects(gridEl: HTMLDivElement | null): Map<number, CellRect> {
+function useCellRects(
+  gridEl: HTMLDivElement | null,
+  cellCount: number,
+): Map<number, CellRect> {
   const [rects, setRects] = useState<Map<number, CellRect>>(() => new Map());
 
   useLayoutEffect(() => {
@@ -12,7 +15,7 @@ function useCellRects(gridEl: HTMLDivElement | null): Map<number, CellRect> {
     const measure = () => {
       const box = gridEl.getBoundingClientRect();
       const next = new Map<number, CellRect>();
-      for (let i = 0; i < 36; i++) {
+      for (let i = 0; i < cellCount; i++) {
         const cell = gridEl.querySelector(`[data-testid="cell-${i}"]`);
         if (!cell) continue;
         const r = cell.getBoundingClientRect();
@@ -30,7 +33,7 @@ function useCellRects(gridEl: HTMLDivElement | null): Map<number, CellRect> {
     const ro = new ResizeObserver(measure);
     ro.observe(gridEl);
     return () => ro.disconnect();
-  }, [gridEl]);
+  }, [gridEl, cellCount]);
 
   return rects;
 }
@@ -93,20 +96,22 @@ function L5CellFx({
 
 export function LineCelebrationOverlay({
   gridEl,
+  cellCount,
   events,
   reduceMotion,
 }: {
   gridEl: HTMLDivElement | null;
+  cellCount: number;
   events: LineCelebrationEvent[];
   reduceMotion: boolean;
 }) {
-  const rects = useCellRects(gridEl);
+  const rects = useCellRects(gridEl, cellCount);
 
   if (reduceMotion || events.length === 0 || !gridEl) return null;
 
   const byIndex = new Map<
     number,
-    { level: 4 | 5; player: 1 | 2; stagger: number }
+    { level: 4 | 5 | 6; player: 1 | 2; stagger: number }
   >();
   for (const ev of events) {
     ev.indices.forEach((index, i) => {
@@ -128,10 +133,10 @@ export function LineCelebrationOverlay({
         const rect = rects.get(index);
         if (!rect) return null;
 
-        if (meta.level === 5) {
+        if (meta.level === 5 || meta.level === 6) {
           return (
             <L5CellFx
-              key={`${index}-l5`}
+              key={`${index}-l${meta.level}`}
               rect={rect}
               player={meta.player}
               stagger={meta.stagger}

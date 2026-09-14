@@ -1,8 +1,11 @@
-import { getScoringLines, type Perspective } from "@numchess/engine";
+import { getScoringLines, type GameConfig, type Perspective } from "@numchess/engine";
 
-export function findLineIndices(lineId: string): number[] | undefined {
+export function findLineIndices(
+  lineId: string,
+  config: GameConfig,
+): number[] | undefined {
   for (const p of ["rows", "columns"] as Perspective[]) {
-    const hit = getScoringLines(p).find((l) => l.id === lineId);
+    const hit = getScoringLines(p, config).find((l) => l.id === lineId);
     if (hit) return hit.indices;
   }
   return undefined;

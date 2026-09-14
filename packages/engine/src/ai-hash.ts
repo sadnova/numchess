@@ -1,3 +1,4 @@
+import { tileValuesFor } from "./config.js";
 import type { GameState } from "./types.js";
 
 /** 64-bit hash for transposition table (not cryptographically secure). */
@@ -9,10 +10,11 @@ export function hashGameState(state: GameState): bigint {
     h ^= BigInt(c === null ? 0 : c);
     h = (h * prime) & 0xffffffffffffffffn;
   }
+  const tiles = tileValuesFor(state.config);
   for (let p = 0; p < 2; p++) {
     const inv = state.inventories[p]!.counts;
-    for (let v = 1; v <= 5; v++) {
-      h ^= BigInt(inv[v as 1 | 2 | 3 | 4 | 5]);
+    for (const v of tiles) {
+      h ^= BigInt(inv[v]);
       h = (h * prime) & 0xffffffffffffffffn;
     }
   }

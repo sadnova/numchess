@@ -6,20 +6,33 @@ import {
   createInitialState,
   createInitialStateWithFirstPlayer,
   getLegalActions,
+  normalizeGameConfig,
   type CompoundMove,
   type GameAction,
+  type GameConfig,
   type GameState,
   type TileValue,
 } from "@numchess/engine";
 import {
   clearResumeGame,
+  gameConfigForSettings,
   loadResumeGame,
+  loadSettings,
+  resumeMatchesSettings,
   saveResumeGame,
 } from "../lib/persistence";
 
 const MAX_UNDO = 40;
 
-const resumed = loadResumeGame();
+const settingsOnBoot = loadSettings();
+const rawResume = loadResumeGame();
+const resumed =
+  rawResume && resumeMatchesSettings(rawResume, settingsOnBoot)
+    ? rawResume
+    : null;
+if (rawResume && !resumed) {
+  clearResumeGame();
+}
 export const startedFromResume = resumed !== null;
 
 interface GameStore {
@@ -31,13 +44,18 @@ interface GameStore {
   placeAt: (index: number) => void;
   cancelSelect: () => void;
   undo: () => void;
-  newGame: (options?: { firstPlayer?: 1 | 2; initialState?: GameState }) => void;
+  newGame: (options?: {
+    firstPlayer?: 1 | 2;
+    initialState?: GameState;
+    config?: GameConfig;
+  }) => void;
   loadState: (state: GameState) => void;
   applyBotCompoundMove: (move: CompoundMove) => boolean;
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
-  state: resumed ?? createInitialState(),
+  state:
+    resumed ?? createInitialState(gameConfigForSettings(settingsOnBoot)),
   undoStack: [],
   selectedTile: null,
 
@@ -79,11 +97,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
     });
   },
 
-  newGame: (options?: { firstPlayer?: 1 | 2; initialState?: GameState }) => {
+  newGame: (options?: {
+    firstPlayer?: 1 | 2;
+    initialState?: GameState;
+    config?: GameConfig;
+  }) => {
     clearResumeGame();
-    let state = options?.initialState ?? createInitialState();
+    const config = normalizeGameConfig(
+      options?.initialState?.config ??
+        options?.config ??
+        gameConfigForSettings(loadSettings()),
+    );
+    let state =
+      options?.initialState ?? createInitialState(config);
     if (!options?.initialState && options?.firstPlayer === 2) {
-      state = createInitialStateWithFirstPlayer(2);
+      state = createInitialStateWithFirstPlayer(2, config);
     }
     set({
       state,

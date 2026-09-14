@@ -1,4 +1,10 @@
-import type { AppSettings, BotDifficulty, GameMode, HumanSeat } from "@/lib/persistence";
+import type {
+  AppSettings,
+  BoardMode,
+  BotDifficulty,
+  GameMode,
+  HumanSeat,
+} from "@/lib/persistence";
 import { chipToggleClass } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -43,11 +49,13 @@ function DifficultyRow({
 }
 
 export function GameModeControls({
+  boardMode,
   gameMode,
   botDifficulty,
   botP1Difficulty,
   botP2Difficulty,
   humanSeat,
+  onBoardModeChange,
   onModeChange,
   onBotDifficulty,
   onBotP1Difficulty,
@@ -55,11 +63,13 @@ export function GameModeControls({
   onHumanSeat,
   className,
 }: {
+  boardMode: BoardMode;
   gameMode: GameMode;
   botDifficulty: AppSettings["botDifficulty"];
   botP1Difficulty: BotDifficulty;
   botP2Difficulty: BotDifficulty;
   humanSeat: HumanSeat;
+  onBoardModeChange: (mode: BoardMode) => void;
   onModeChange: (mode: GameMode) => void;
   onBotDifficulty: (d: AppSettings["botDifficulty"]) => void;
   onBotP1Difficulty: (d: BotDifficulty) => void;
@@ -69,6 +79,30 @@ export function GameModeControls({
 }) {
   return (
     <div className={cn("flex flex-col items-center gap-2", className)}>
+      <div
+        className="inline-flex flex-wrap justify-center gap-1 rounded-xl border border-border-subtle bg-surface-2 p-1 max-w-full"
+        role="group"
+        aria-label="Board mode"
+      >
+        <button
+          type="button"
+          aria-pressed={boardMode === "classic"}
+          data-testid="board-classic"
+          onClick={() => onBoardModeChange("classic")}
+          className={segmentTab(boardMode === "classic")}
+        >
+          Classic
+        </button>
+        <button
+          type="button"
+          aria-pressed={boardMode === "strategic"}
+          data-testid="board-strategic"
+          onClick={() => onBoardModeChange("strategic")}
+          className={segmentTab(boardMode === "strategic")}
+        >
+          Strategic
+        </button>
+      </div>
       <div
         className="inline-flex flex-wrap justify-center gap-1 rounded-xl border border-border-subtle bg-surface-2 p-1 max-w-full"
         role="group"

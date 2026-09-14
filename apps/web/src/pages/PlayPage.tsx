@@ -33,11 +33,14 @@ import { findLineIndices, lineCategory } from "../lib/lines";
 import { entriesFromLineDelta, type ScoreFeedEntry } from "../lib/scoreFeed";
 import { canHumanAct } from "../lib/playVsBot";
 import {
+  gameConfigForSettings,
+  isAppSettings,
   isSandboxMode,
   loadSettings,
   resolveFirstPlayer,
   saveSettings,
   type AppSettings,
+  type BoardMode,
   type GameMode,
   type HumanSeat,
 } from "../lib/persistence";
@@ -61,8 +64,13 @@ export function PlayPage() {
   const isBotSpectator = effectiveMode === "botSpectator";
   const reducedMotion = useReducedMotion(settings.reduceMotion);
   const sounds = useGameAudio(settings);
+  const state = useGameStore((s) => s.state);
   const { activeEvents, celebrationHoldMsRef, onPlyScored } =
-    useLineCelebrations(reducedMotion, sounds.playLevel5Celebrate);
+    useLineCelebrations(
+      reducedMotion,
+      state.config,
+      sounds.playLevel5Celebrate,
+    );
 
   const botConfig = useMemo((): BotPlayerConfig => {
     if (isVsBot) {
@@ -121,7 +129,6 @@ export function PlayPage() {
   const [rulesOpen, setRulesOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const state = useGameStore((s) => s.state);
   const live = useLiveScore(state);
   const [scoreFeed, setScoreFeed] = useState<ScoreFeedEntry[]>([]);
   const [pulseKey, setPulseKey] = useState("");
@@ -175,14 +182,18 @@ export function PlayPage() {
       setScoreFeed([]);
       sounds.resetLineDebouncers();
     } else if (state.ply > prevPlyRef.current) {
-      const delta = lineScoreDelta(prevBoardRef.current, state.board);
+      const delta = lineScoreDelta(
+        prevBoardRef.current,
+        state.board,
+        state.config,
+      );
       const newEntries = entriesFromLineDelta(delta);
       if (newEntries.length > 0) {
         setScoreFeed((f) => [...newEntries, ...f].slice(0, 12));
         sounds.playLineLockFanfare(delta);
         if (!settings.reduceMotion) {
           const lv = newEntries
-            .flatMap((e) => e.text.match(/L[2-5]/g) ?? [])
+            .flatMap((e) => e.text.match(/L[2-6]/g) ?? [])
             .join(",");
           setPulseKey(`${Date.now()}-${lv}`);
         }
@@ -228,7 +239,7 @@ export function PlayPage() {
   }, [effectiveMode, loadState, startedFromResume]);
 
   const highlightIndices = highlightLineId
-    ? findLineIndices(highlightLineId)
+    ? findLineIndices(highlightLineId, state.config)
     : undefined;
 
   const updateSettings = (patch: Partial<AppSettings>) => {
@@ -239,27 +250,55 @@ export function PlayPage() {
     });
   };
 
-  const startNewGame = () => {
+  const startNewGame = (settingsSnapshot?: AppSettings) => {
+    const snap = isAppSettings(settingsSnapshot) ? settingsSnapshot : settings;
+    const liveState = useGameStore.getState().state;
+    const modeForGame = isSandboxMode() ? "sandbox" : snap.gameMode;
+
+    const boardMode: BoardMode = isAppSettings(settingsSnapshot)
+      ? settingsSnapshot.boardMode
+      : liveState.phase.kind === "ended"
+        ? liveState.config.boardMode
+        : snap.boardMode;
+
     setScoreFeed([]);
     sounds.resetLineDebouncers();
-    if (effectiveMode === "botSpectator") {
-      updateSettings({ spectatorAutoPlay: true });
-    }
-    const { first, settingsPatch } = resolveFirstPlayer(settings);
-    if (Object.keys(settingsPatch).length > 0) {
-      updateSettings(settingsPatch);
-    }
-    if (effectiveMode === "sandbox") {
+
+    const working =
+      modeForGame === "botSpectator"
+        ? { ...snap, boardMode, spectatorAutoPlay: true }
+        : { ...snap, boardMode };
+
+    const { first, settingsPatch } = resolveFirstPlayer(working);
+    const merged: AppSettings = { ...working, ...settingsPatch, boardMode };
+
+    saveSettings(merged);
+    setSettings(merged);
+
+    if (modeForGame === "sandbox") {
       newGame({ initialState: createSandboxState() });
     } else {
-      newGame({ firstPlayer: first });
+      newGame({
+        firstPlayer: first,
+        config: gameConfigForSettings(merged),
+      });
     }
+  };
+
+  const setBoardMode = (boardMode: BoardMode) => {
+    if (boardMode === settings.boardMode) return;
+    const next = { ...settings, boardMode };
+    saveSettings(next);
+    setSettings(next);
+    startNewGame(next);
   };
 
   const setGameMode = (gameMode: GameMode) => {
     if (gameMode === settings.gameMode) return;
-    updateSettings({ gameMode });
-    startNewGame();
+    const next = { ...settings, gameMode };
+    saveSettings(next);
+    setSettings(next);
+    startNewGame(next);
   };
 
   const openReplayReview = () => {
@@ -288,7 +327,11 @@ export function PlayPage() {
         setImportError(result.error);
         return;
       }
-      loadState(result.state);
+      const loaded = result.state;
+      if (loaded.config.boardMode !== settings.boardMode) {
+        updateSettings({ boardMode: loaded.config.boardMode });
+      }
+      loadState(loaded);
       setScoreFeed([]);
       sounds.resetLineDebouncers();
       setImportToast(
@@ -334,11 +377,13 @@ export function PlayPage() {
             modeControls={
               effectiveMode !== "sandbox" ? (
                 <GameModeControls
+                  boardMode={settings.boardMode}
                   gameMode={settings.gameMode}
                   botDifficulty={settings.botDifficulty}
                   botP1Difficulty={settings.botP1Difficulty}
                   botP2Difficulty={settings.botP2Difficulty}
                   humanSeat={settings.humanSeat}
+                  onBoardModeChange={setBoardMode}
                   onModeChange={setGameMode}
                   onBotDifficulty={(d) => updateSettings({ botDifficulty: d })}
                   onBotP1Difficulty={(d) =>
@@ -348,8 +393,10 @@ export function PlayPage() {
                     updateSettings({ botP2Difficulty: d })
                   }
                   onHumanSeat={(seat: HumanSeat) => {
-                    updateSettings({ humanSeat: seat });
-                    startNewGame();
+                    const next = { ...settings, humanSeat: seat };
+                    saveSettings(next);
+                    setSettings(next);
+                    startNewGame(next);
                   }}
                 />
               ) : null
@@ -402,6 +449,7 @@ export function PlayPage() {
               leader={live.leader.leader}
               decisiveLevel={live.leader.decisiveLevel}
               pulseKey={pulseKey}
+              tiebreakLevels={state.config.scoring.tiebreakLevels}
             />
           </div>
         }
@@ -448,7 +496,11 @@ export function PlayPage() {
               />
             )}
             {phase.kind === "ended" && (
-              <EndScreen result={phase.result} onNewGame={startNewGame} />
+              <EndScreen
+                result={phase.result}
+                tiebreakLevels={state.config.scoring.tiebreakLevels}
+                onNewGame={startNewGame}
+              />
             )}
           </>
         }
@@ -480,7 +532,11 @@ export function PlayPage() {
         settings={settings}
         onChange={updateSettings}
       />
-      <RulesDialog open={rulesOpen} onClose={() => setRulesOpen(false)} />
+      <RulesDialog
+        open={rulesOpen}
+        boardMode={settings.boardMode}
+        onClose={() => setRulesOpen(false)}
+      />
     </>
   );
 }

@@ -1,6 +1,7 @@
 import { canReachL5OnLine, combinedInventoryCounts } from "./analysis.js";
 import { getFilledLineCells, getScoringLines } from "./lines.js";
-import type { GameState, PlayerId, TileValue } from "./types.js";
+import type { TileValue } from "./constants.js";
+import type { GameState, PlayerId } from "./types.js";
 import type { Perspective } from "./types.js";
 
 export interface LineThreatInfo {
@@ -30,7 +31,7 @@ function buildLineInfos(
 ): LineThreatInfo[] {
   const board = state.board;
   const out: LineThreatInfo[] = [];
-  for (const line of getScoringLines(perspective)) {
+  for (const line of getScoringLines(perspective, state.config)) {
     const empties = line.indices.filter((i) => board[i] === null);
     const filled = line.indices.length - empties.length;
     const partial = getFilledLineCells(board, line.indices);
@@ -42,6 +43,7 @@ function buildLineInfos(
         slotsLeft,
         inventory,
         line.indices.length,
+        state.config,
       );
     }
     out.push({

@@ -2,10 +2,13 @@ import {
   applyAction,
   applyCompoundMove,
   chooseBotMove,
+  configForBoardMode,
   createInitialState,
   getLegalActions,
   RULES_VERSION,
+  RULES_VERSION_STRATEGIC,
   searchOptionsForDifficulty,
+  type BoardMode,
   type GameState,
   type SearchOptions,
 } from "@numchess/engine";
@@ -34,6 +37,7 @@ function parseArgs() {
   let seed = 42;
   let botMs: number | undefined = undefined;
   let difficulty: "easy" | "medium" | "hard" = "medium";
+  let boardMode: BoardMode = "classic";
   for (let i = 2; i < process.argv.length; i++) {
     if (process.argv[i] === "--games") games = Number(process.argv[++i]);
     if (process.argv[i] === "--seed") seed = Number(process.argv[++i]);
@@ -41,8 +45,12 @@ function parseArgs() {
     if (process.argv[i] === "--difficulty") {
       difficulty = process.argv[++i] as "easy" | "medium" | "hard";
     }
+    if (process.argv[i] === "--board") {
+      const v = process.argv[++i];
+      boardMode = v === "strategic" ? "strategic" : "classic";
+    }
   }
-  return { games, seed, botMs, difficulty };
+  return { games, seed, botMs, difficulty, boardMode };
 }
 
 function mulberry32(a: number) {
@@ -58,8 +66,9 @@ function mulberry32(a: number) {
 function playGame(
   _rng: () => number,
   botOptions: SearchOptions,
+  boardMode: BoardMode,
 ): 1 | 2 | "draw" {
-  let state = createInitialState();
+  let state = createInitialState(configForBoardMode(boardMode));
   while (state.phase.kind !== "ended") {
     if (state.phase.player === 2) {
       const move = chooseBotMove(state, 2, botOptions);
@@ -81,8 +90,8 @@ function playGame(
     : state.phase.result.winner;
 }
 
-const { games, seed, botMs, difficulty } = parseArgs();
-const base = searchOptionsForDifficulty(difficulty);
+const { games, seed, botMs, difficulty, boardMode } = parseArgs();
+const base = searchOptionsForDifficulty(difficulty, boardMode);
 const botOptions: SearchOptions = {
   ...base,
   ...(botMs !== undefined ? { timeMs: botMs } : {}),
@@ -94,7 +103,7 @@ let draws = 0;
 
 for (let g = 0; g < games; g++) {
   void rng();
-  const w = playGame(rng, botOptions);
+  const w = playGame(rng, botOptions, boardMode);
   if (w === 2) p2++;
   else if (w === 1) p1++;
   else draws++;
@@ -106,7 +115,9 @@ for (let g = 0; g < games; g++) {
 console.log(
   JSON.stringify(
     {
-      rulesVersion: RULES_VERSION,
+      rulesVersion:
+        boardMode === "strategic" ? RULES_VERSION_STRATEGIC : RULES_VERSION,
+      boardMode,
       games,
       seed,
       difficulty,

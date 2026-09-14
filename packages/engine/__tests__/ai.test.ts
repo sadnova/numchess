@@ -45,3 +45,11 @@ describe("evaluatePosition", () => {
     expect(evaluatePosition(s, 2)).toBe(0);
   });
 });
+
+describe("searchOptionsForDifficulty", () => {
+  it("uses higher budget on strategic board", () => {
+    const classic = searchOptionsForDifficulty("medium", "classic");
+    const strategic = searchOptionsForDifficulty("medium", "strategic");
+    expect(strategic.timeMs).toBeGreaterThan(classic.timeMs ?? 0);
+  });
+});

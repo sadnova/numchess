@@ -6,15 +6,24 @@ import { PostGameAnalysis } from "@/components/PostGameAnalysis";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
+function tiebreakLabel(
+  levels: readonly (2 | 3 | 4 | 5 | 6)[],
+): string {
+  return levels.map((l) => `L${l}`).join(" → ");
+}
+
 export function EndScreen({
   result,
+  tiebreakLevels,
   onNewGame,
 }: {
   result: GameResult;
+  tiebreakLevels: readonly (2 | 3 | 4 | 5 | 6)[];
   onNewGame: () => void;
 }) {
   const isWin = result.outcome === "win";
   const isDraw = result.outcome === "draw";
+  const compareText = tiebreakLabel(tiebreakLevels);
 
   return (
     <section
@@ -58,7 +67,7 @@ export function EndScreen({
               Level {result.decisiveLevel}
             </span>
             {" · "}
-            lexicographic compare L5 → L2
+            compare {compareText}
           </p>
         )}
       </div>
@@ -66,18 +75,22 @@ export function EndScreen({
       <div className="px-6 py-5 space-y-5 border-t border-border-subtle">
         <LevelScoreCard
           levels={result.levels}
+          tiebreakLevels={tiebreakLevels}
           outcome={result.outcome}
           decisiveLevel={isWin ? result.decisiveLevel : undefined}
           winner={isWin ? result.winner : undefined}
         />
 
-        <PostGameAnalysis result={result} />
+        <PostGameAnalysis result={result} tiebreakLevels={tiebreakLevels} />
 
         <div className="pt-1">
           <LineLedger result={result} />
         </div>
 
-        <Button className="w-full py-2.5 text-base" onClick={onNewGame}>
+        <Button
+          className="w-full py-2.5 text-base"
+          onClick={() => onNewGame()}
+        >
           Play again
         </Button>
       </div>

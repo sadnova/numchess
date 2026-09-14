@@ -1,3 +1,4 @@
+import type { BoardMode } from "./constants.js";
 import { getLegalCompoundMoves } from "./ai-moves.js";
 import { selectBotMove } from "./bot-move-selector.js";
 import type { SearchOptions } from "./ai-search-types.js";
@@ -53,10 +54,12 @@ export function pickSearchMove(
 
 export function searchOptionsForDifficulty(
   level: "easy" | "medium" | "hard",
+  boardMode: BoardMode = "classic",
 ): SearchOptions {
+  let base: SearchOptions;
   switch (level) {
     case "easy":
-      return {
+      base = {
         timeMs: 120,
         maxDepth: 2,
         searchTopK: 8,
@@ -66,8 +69,9 @@ export function searchOptionsForDifficulty(
         easyTopK: 3,
         useTranspositionTable: false,
       };
+      break;
     case "hard":
-      return {
+      base = {
         timeMs: 600,
         maxDepth: 7,
         searchTopK: 16,
@@ -75,8 +79,9 @@ export function searchOptionsForDifficulty(
         quiescenceDepth: 2,
         useTranspositionTable: true,
       };
+      break;
     default:
-      return {
+      base = {
         timeMs: 300,
         maxDepth: 5,
         searchTopK: 12,
@@ -85,6 +90,14 @@ export function searchOptionsForDifficulty(
         useTranspositionTable: true,
       };
   }
+  if (boardMode !== "strategic") return base;
+  return {
+    ...base,
+    timeMs: Math.round((base.timeMs ?? 300) * 1.35),
+    maxDepth: Math.min((base.maxDepth ?? 5) + 1, 8),
+    searchTopK: (base.searchTopK ?? 12) + 4,
+    childTopK: (base.childTopK ?? 8) + 2,
+  };
 }
 
 export type { SearchOptions } from "./ai-search-types.js";

@@ -84,6 +84,13 @@ body {
     transparent 6px
   );
 }
+.value-pattern-6 {
+  background-image: radial-gradient(
+    circle at 30% 30%,
+    oklch(0.55 0.14 15 / 0.2) 0%,
+    transparent 55%
+  );
+}
 
 @keyframes pulse-place {
   0%,

@@ -1,8 +1,10 @@
 import {
   applyCompoundMove,
   chooseBotMove,
+  configForBoardMode,
   createInitialState,
   searchOptionsForDifficulty,
+  type BoardMode,
   type GameState,
   type PlayerId,
 } from "@numchess/engine";
@@ -12,13 +14,18 @@ function parseArgs() {
   let seed = 42;
   let p1Level: "easy" | "medium" | "hard" = "hard";
   let p2Level: "easy" | "medium" | "hard" = "medium";
+  let boardMode: BoardMode = "classic";
   for (let i = 2; i < process.argv.length; i++) {
     if (process.argv[i] === "--games") games = Number(process.argv[++i]);
     if (process.argv[i] === "--seed") seed = Number(process.argv[++i]);
     if (process.argv[i] === "--p1") p1Level = process.argv[++i] as typeof p1Level;
     if (process.argv[i] === "--p2") p2Level = process.argv[++i] as typeof p2Level;
+    if (process.argv[i] === "--board") {
+      const v = process.argv[++i];
+      boardMode = v === "strategic" ? "strategic" : "classic";
+    }
   }
-  return { games, seed, p1Level, p2Level };
+  return { games, seed, p1Level, p2Level, boardMode };
 }
 
 function mulberry32(a: number) {
@@ -31,9 +38,9 @@ function mulberry32(a: number) {
   };
 }
 
-const { games, seed, p1Level, p2Level } = parseArgs();
-const optsP1 = searchOptionsForDifficulty(p1Level);
-const optsP2 = searchOptionsForDifficulty(p2Level);
+const { games, seed, p1Level, p2Level, boardMode } = parseArgs();
+const optsP1 = searchOptionsForDifficulty(p1Level, boardMode);
+const optsP2 = searchOptionsForDifficulty(p2Level, boardMode);
 
 function botMove(state: GameState, player: PlayerId) {
   const opts = player === 1 ? optsP1 : optsP2;
@@ -41,7 +48,7 @@ function botMove(state: GameState, player: PlayerId) {
 }
 
 function playGame(): 1 | 2 | "draw" {
-  let state = createInitialState();
+  let state = createInitialState(configForBoardMode(boardMode));
   while (state.phase.kind !== "ended") {
     const p = state.phase.player;
     const move = botMove(state, p);
@@ -76,6 +83,7 @@ console.log(
       seed,
       p1Level,
       p2Level,
+      boardMode,
       p1Wins: p1,
       p2Wins: p2,
       draws,

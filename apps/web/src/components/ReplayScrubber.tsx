@@ -1,10 +1,5 @@
 import { useMemo } from "react";
-import {
-  BOARD_SIZE,
-  CELL_COUNT,
-  indexToRowCol,
-  type GameState,
-} from "@numchess/engine";
+import { cellCount, indexToRowCol, type GameState } from "@numchess/engine";
 import type { ReplayFile } from "@numchess/replay";
 import { stateAtReplayStep } from "../lib/replay";
 
@@ -91,15 +86,17 @@ export function ReplayScrubber({
 }
 
 function ReadOnlyBoard({ state }: { state: GameState }) {
+  const size = state.config.boardSize;
+  const cells = cellCount(state.config);
   return (
     <div
       className="grid gap-1 p-2 rounded-xl bg-surface-2 border border-border-subtle"
       style={{
-        gridTemplateColumns: `repeat(${BOARD_SIZE}, minmax(36px, 1fr))`,
+        gridTemplateColumns: `repeat(${size}, minmax(36px, 1fr))`,
       }}
     >
-      {Array.from({ length: CELL_COUNT }, (_, index) => {
-        const { row, col } = indexToRowCol(index);
+      {Array.from({ length: cells }, (_, index) => {
+        const { row, col } = indexToRowCol(index, size);
         const value = state.board[index];
         return (
           <div

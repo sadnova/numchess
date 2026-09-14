@@ -1,10 +1,23 @@
 import type { GameResult } from "@numchess/engine";
 
-export function PostGameAnalysis({ result }: { result: GameResult }) {
+function tiebreakLabel(
+  levels: readonly (2 | 3 | 4 | 5 | 6)[],
+): string {
+  return levels.map((l) => `L${l}`).join("→");
+}
+
+export function PostGameAnalysis({
+  result,
+  tiebreakLevels,
+}: {
+  result: GameResult;
+  tiebreakLevels: readonly (2 | 3 | 4 | 5 | 6)[];
+}) {
   const { levels } = result;
+  const band = tiebreakLabel(tiebreakLevels);
   const explanation =
     result.outcome === "draw"
-      ? "All compared levels (L5→L2) are tied."
+      ? `All compared levels (${band}) are tied.`
       : `Player ${result.winner} leads at Level ${result.decisiveLevel} (rows ${levels.rows[result.decisiveLevel]} vs columns ${levels.columns[result.decisiveLevel]}).`;
 
   const topP1 = [...result.ledger.player1]

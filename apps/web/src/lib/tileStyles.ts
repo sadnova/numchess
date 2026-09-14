@@ -6,6 +6,7 @@ export function tileValueClass(value: number | null): string {
     3: "ring-2 ring-amber-400/70 value-pattern-3",
     4: "ring-2 ring-fuchsia-400/70 value-pattern-4",
     5: "ring-2 ring-orange-400/70 value-pattern-5",
+    6: "ring-2 ring-rose-400/70 value-pattern-6",
   };
   return rings[value] ?? "";
 }

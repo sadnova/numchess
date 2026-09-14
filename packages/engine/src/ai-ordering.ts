@@ -1,5 +1,4 @@
 import { analyzePositionForPlayer } from "./analysis.js";
-import { BOARD_SIZE } from "./constants.js";
 import { LEVEL_WEIGHT } from "./ai-weights.js";
 import { evaluatePosition } from "./ai-eval.js";
 import {
@@ -39,7 +38,9 @@ export function blocksOpponentCritical(
   const perspective = perspectiveForPlayer(opp);
   for (const ins of analyzePositionForPlayer(state, opp)) {
     if (ins.band !== "critical") continue;
-    const line = getScoringLines(perspective).find((l) => l.id === ins.lineId);
+    const line = getScoringLines(perspective, state.config).find(
+      (l) => l.id === ins.lineId,
+    );
     if (!line) continue;
     const empties = line.indices.filter((i) => state.board[i] === null);
     if (empties.length === 1 && empties[0] === move.place) return 1;
@@ -47,11 +48,12 @@ export function blocksOpponentCritical(
   return 0;
 }
 
-function centerTiebreak(placeIndex: number): number {
-  const row = Math.floor(placeIndex / BOARD_SIZE);
-  const col = placeIndex % BOARD_SIZE;
-  const dr = row - 2.5;
-  const dc = col - 2.5;
+function centerTiebreak(placeIndex: number, size: number): number {
+  const row = Math.floor(placeIndex / size);
+  const col = placeIndex % size;
+  const mid = (size - 1) / 2;
+  const dr = row - mid;
+  const dc = col - mid;
   return -(dr * dr + dc * dc);
 }
 
@@ -69,12 +71,12 @@ export function sortCompoundMoves(
     let gain = 0;
     let evalScore = -Infinity;
     if (next) {
-      const delta = lineScoreDelta(state.board, next.board);
+      const delta = lineScoreDelta(state.board, next.board, state.config);
       gain = contributionDeltaScore(delta, mover);
       evalScore = evaluatePosition(next, rootPlayer);
     }
     const block = blocksOpponentCritical(state, move);
-    const center = centerTiebreak(move.place);
+    const center = centerTiebreak(move.place, state.config.boardSize);
     const pv = sameCompoundMove(move, pvMove) ? 1 : 0;
     return { move, gain, block, evalScore, center, pv };
   });

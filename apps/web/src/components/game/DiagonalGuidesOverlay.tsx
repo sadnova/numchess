@@ -1,3 +1,4 @@
+import type { GameConfig } from "@numchess/engine";
 import { useLayoutEffect, useState } from "react";
 import {
   getDiagonalGuideSpecs,
@@ -8,7 +9,10 @@ import {
   type CellRect,
 } from "@/lib/diagonalGuideOutline";
 
-function useCellRects(gridEl: HTMLDivElement | null): Map<number, CellRect> {
+function useCellRects(
+  gridEl: HTMLDivElement | null,
+  cellCount: number,
+): Map<number, CellRect> {
   const [rects, setRects] = useState<Map<number, CellRect>>(() => new Map());
 
   useLayoutEffect(() => {
@@ -17,7 +21,7 @@ function useCellRects(gridEl: HTMLDivElement | null): Map<number, CellRect> {
     const measure = () => {
       const box = gridEl.getBoundingClientRect();
       const next = new Map<number, CellRect>();
-      for (let i = 0; i < 36; i++) {
+      for (let i = 0; i < cellCount; i++) {
         const cell = gridEl.querySelector(`[data-testid="cell-${i}"]`);
         if (!cell) continue;
         const r = cell.getBoundingClientRect();
@@ -35,7 +39,7 @@ function useCellRects(gridEl: HTMLDivElement | null): Map<number, CellRect> {
     const ro = new ResizeObserver(measure);
     ro.observe(gridEl);
     return () => ro.disconnect();
-  }, [gridEl]);
+  }, [gridEl, cellCount]);
 
   return rects;
 }
@@ -43,11 +47,13 @@ function useCellRects(gridEl: HTMLDivElement | null): Map<number, CellRect> {
 function GuideRibbon({
   guide,
   rects,
+  boardSize,
 }: {
   guide: DiagonalGuideSpec;
   rects: Map<number, CellRect>;
+  boardSize: number;
 }) {
-  const d = connectedGuidePath(guide, rects);
+  const d = connectedGuidePath(guide, rects, boardSize);
   if (!d) return null;
 
   const isP1 = guide.player === 1;
@@ -87,11 +93,19 @@ function GuideRibbon({
   );
 }
 
-export function DiagonalGuidesOverlay({ gridEl }: { gridEl: HTMLDivElement }) {
-  const rects = useCellRects(gridEl);
-  const guides = getDiagonalGuideSpecs();
+export function DiagonalGuidesOverlay({
+  gridEl,
+  cellCount,
+  config,
+}: {
+  gridEl: HTMLDivElement;
+  cellCount: number;
+  config: GameConfig;
+}) {
+  const rects = useCellRects(gridEl, cellCount);
+  const guides = getDiagonalGuideSpecs(config);
 
-  if (rects.size < 36) return null;
+  if (rects.size < cellCount) return null;
 
   const w = gridEl.clientWidth;
   const h = gridEl.clientHeight;
@@ -106,7 +120,12 @@ export function DiagonalGuidesOverlay({ gridEl }: { gridEl: HTMLDivElement }) {
       aria-hidden
     >
       {guides.map((g) => (
-        <GuideRibbon key={g.id} guide={g} rects={rects} />
+        <GuideRibbon
+          key={g.id}
+          guide={g}
+          rects={rects}
+          boardSize={config.boardSize}
+        />
       ))}
     </svg>
   );
